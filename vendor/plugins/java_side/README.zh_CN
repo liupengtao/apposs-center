@@ -1,0 +1,53 @@
+JavaSide
+========
+
+为jruby on rails项目添加传统java开发相关的支持
+
+ - maven支持: 对rails项目中使用的第三方jar包，使用maven进行管理
+ - spring支持: 对spring进行支持，在rails中使用已有的java服务
+ - 兼容warbler: 无须额外操作，只要执行 warble 命令，就可以得到正确的war文件
+
+Installation
+=============
+
+rails plugin install git://github.com/fsword/java_side.git
+
+
+Springframework Support
+=======================
+
+- 添加spring支持
+
+1.修改 config/application.rb 文件, 加入配置内容如下：
+
+  class Application < Rails::Application
+    ...
+    config.spring = true
+    ...
+  end
+
+2.检查 java/pom.xml 文件，确保springframework的相关依赖已经被添加(缺省的pom.xml文件本身就有).
+3.运行打包任务：rake java_side:jars
+
+- 使用
+
+你可以直接在你的模型代码中使用 get_bean ，如下:
+
+class User < ActiveRecord::Base
+  def doSth
+    get_bean('your_bean_id').invokeTheService
+    ...
+  end
+end
+
+如果需要在代码的其它位置使用，可以 include JavaSide::Spring，例如:
+
+  Loading development environment (Rails 3.0.6)
+  jruby-1.5.6 :001 > include JavaSide::Spring
+   => Object 
+  jruby-1.5.6 :002 > x = get_bean 'sample'
+   => #<Java::JavaUtil::ArrayList:0x496d864e> 
+  jruby-1.5.6 :003 > x.length
+   => 3 
+
+Copyright (c) 2010 fsword, released under the MIT license
