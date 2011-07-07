@@ -1,4 +1,4 @@
-if RUBY_PLATFORM =~ /java/
+if RUBY_PLATFORM =~ /java/ and ENV["IGNORE_JAVA_SIDE"].nil?
   require 'java'
 
   Dir[Rails.root + "java/jars/*.jar"].each{|jar_file|
@@ -24,6 +24,8 @@ if RUBY_PLATFORM =~ /java/
   rescue Exception => e
     $stderr.puts "unknown error - #{e.to_s}"
   end
+elsif not ENV["IGNORE_JAVA_SIDE"].nil?
+  warn "java_side is ignored"
 else
   warn "java_side is only for use with JRuby"
 end
