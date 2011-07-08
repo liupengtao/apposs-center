@@ -7,7 +7,12 @@
   <%= csrf_meta_tag %>
 </head>
 <body>
-
+<ul>
+	<% %w{apps}.each{|res| %>
+	<li><%=link_to res.to_sym %></li>
+	<% } %>
+	<li></li>
+</ul>
 <%= yield %>
 
 </body>

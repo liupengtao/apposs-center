@@ -1,4 +1,6 @@
 Apposs::Application.routes.draw do
+  resources :apps
+
   devise_for :users
 
   root :to => 'home#index'
