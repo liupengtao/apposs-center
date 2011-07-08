@@ -2,7 +2,7 @@
 <% resource.attributes.each_pair do |attr, value| %>
   <% next if ['id', 'created_at', 'updated_at'].include?(attr) %>
   <tr>
-    <th><%= attr.titleize %></th>
+    <th><%= resource.class.human_attribute_name attr.to_sym %></th>
     <td><%= value %></td>
   </tr>
 <% end %>

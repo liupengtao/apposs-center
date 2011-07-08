@@ -2,8 +2,13 @@ zh-CN:
   activerecord:
     models:
       user: '用户'
+      app: '应用'
     attributes:
       user:
         email: '邮箱'
         password: '密码'
         password_confirmation: '确认密码'
+        remember_me: '下次访问自动登录'
+      app:
+        name: '名称'
+

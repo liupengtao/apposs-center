@@ -7,11 +7,14 @@
   <%= csrf_meta_tag %>
 </head>
 <body>
+
+<span id="notice"><%=flash[:notice] %></span>
 <ul>
-	<% %w{apps}.each{|res| %>
-	<li><%=link_to res.to_sym %></li>
+	<% [App].each{|res| %>
+	<li><%=link_to res.model_name.human, res.to_s.tableize.to_sym %></li>
 	<% } %>
-	<li></li>
+    <li><%=link_to "登录", '/users/sign_in' %></li>
+    <li><%=link_to "退出", '/users/sign_out' %></li>
 </ul>
 <%= yield %>
 

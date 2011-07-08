@@ -29,6 +29,7 @@ gem 'rails', '3.0.6'
 # group :development, :test do
 #   gem 'webrat'
 # end
+gem "ruby-debug"
 gem "arel", "2.0.9"
 gem "rspec-rails", "2.6.0.rc6", :group => ["development", "test"]
 gem "cucumber-rails", :group => ["development", "test"]

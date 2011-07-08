@@ -3,7 +3,7 @@
     <tr>
     <% collection.first.attributes.each_pair do |field, value| %>
       <% next if ['id', 'created_at', 'updated_at'].include?(field) %>
-      <th><%= field.titleize %></th>
+      <th><%= collection.first.class.human_attribute_name field.to_sym %></th>
     <% end %>
     </tr>
   </thead>
@@ -14,9 +14,9 @@
       <% next if ['id', 'created_at', 'updated_at'].include?(field) %>
       <td><%= value %></td>
     <% end %>
-      <td><%= link_to "Show", resource_url(r) %></td>
-      <td><%= link_to "Edit", edit_resource_url(r) %></td>
-      <td><%= link_to "Destroy", resource_url(r), :confirm => 'Are you sure?', :method => :delete %></td>
+      <td><%= link_to "显示", resource_url(r) %></td>
+      <td><%= link_to "编辑", edit_resource_url(r) %></td>
+      <td><%= link_to "删除", resource_url(r), :confirm => '确定要删除?', :method => :delete %></td>
     </tr>
   <% end %>
   </tbody>

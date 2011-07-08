@@ -1,4 +1,4 @@
-<h1><%= controller.controller_name.titleize %></h1>
+<h1><%= controller.controller_name.singularize.capitalize.constantize.model_name.human %>列表</h1>
 
 <%= render "index_navigation" %>
 
