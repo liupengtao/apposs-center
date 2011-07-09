@@ -1,9 +1,9 @@
-<table class="<%= collection.first.class.to_s.downcase.pluralize %> collection">
+<table class="<%= resource_class.to_s.downcase.pluralize %> collection">
   <thead>
     <tr>
     <% collection.first.attributes.each_pair do |field, value| %>
       <% next if ['id', 'created_at', 'updated_at'].include?(field) %>
-      <th><%= collection.first.class.human_attribute_name field.to_sym %></th>
+      <th><%= resource_class.human_attribute_name field.to_sym %></th>
     <% end %>
     </tr>
   </thead>

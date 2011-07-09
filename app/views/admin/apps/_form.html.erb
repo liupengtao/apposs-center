@@ -17,15 +17,20 @@
   <% end %>
   <% resource.attributes.each_pair do |field, value| %>
     <% next if ['id', 'created_at', 'updated_at'].include?(field) %>
-    <tr>
-      <td><%= resource.class.human_attribute_name field.to_sym %></td>
-      <td><%= f.text_field field.to_sym %></td>
-    </tr>
+  <tr>
+    <td><%= resource.class.human_attribute_name field.to_sym %></td>
+    <td><%= f.text_field field.to_sym %></td>
+  </tr>
   <% end %>
-  <tr><td>
+  <tr><td colspan="2" id="machines_title">机器列表：</td></tr>
   <% resource.machines.each{|m| %>
-  <input type="checkbox" name="app[machines]" value="<%=m.id %>" checked="checked"/> <%=m.name %>
+  <tr>
+  	<td colspan="2"><label><input type="checkbox" name="app[machines][]" value="<%=m.id %>" checked="checked"/><%=m.name %></label></td>
   <% }%>
+  </tr>
+  <tr><td colspan="2">
+  	<%=select("machine", "name", Machine.all.collect{|m| [m.name, m.id]}, {:include_blank => true})%>
+  	<a href="javascript:add_machine();void 0">添加机器</a>
   </td></tr>
   <tr>
     <td colspan="2"><%= f.submit %></td>

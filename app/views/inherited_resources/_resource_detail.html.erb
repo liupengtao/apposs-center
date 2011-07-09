@@ -1,8 +1,8 @@
-<table class="<%= collection.first.class.to_s.downcase %> detail">
+<table class="<%= resource_class.to_s.downcase %> detail">
 <% resource.attributes.each_pair do |attr, value| %>
   <% next if ['id', 'created_at', 'updated_at'].include?(attr) %>
   <tr>
-    <th><%= resource.class.human_attribute_name attr.to_sym %></th>
+    <th><%= resource_class.human_attribute_name attr.to_sym %></th>
     <td><%= value %></td>
   </tr>
 <% end %>

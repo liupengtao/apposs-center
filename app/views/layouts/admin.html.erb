@@ -5,6 +5,16 @@
   <%= stylesheet_link_tag :all %>
   <%= javascript_include_tag :defaults %>
   <%= csrf_meta_tag %>
+  <script type="text/javascript">
+  	function add_machine(){
+  		var options = document.forms[0]['machine[name]'].options;
+  		if(var i=0; i < options.length; i++){
+  			if(options[i].selected){
+  				$('machines_title');
+  			}
+  		}
+  	}
+  </script>
 </head>
 <body>
 <span id="notice"><%=flash[:notice] %></span>
