@@ -10,7 +10,7 @@
 <span id="notice"><%=flash[:notice] %></span>
 <ul>
 	<% [App].each{|res| %>
-	<li><%=link_to res.model_name.human, res.to_s.tableize %></li>
+	<li><%=link_to res.model_name.human, "admin_"+res.to_s.tableize %></li>
 	<% } %>
 	<% if current_user.nil? %>
     <li>您好，请点击<%=link_to "这里", '/users/sign_in' %>登录系统</li>
