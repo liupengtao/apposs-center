@@ -3,6 +3,7 @@ class CreateStakeholders < ActiveRecord::Migration
     create_table :stakeholders do |t|
       t.integer :role_id
       t.integer :user_id
+      t.integer :app_id
 
       t.timestamps
     end
