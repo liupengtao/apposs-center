@@ -4,5 +4,8 @@
       <li><%=link_to app.name, :controller => :home, :action => :app, :id => app.id %></li>
   <%    } %>
   <% else %>
+  <%    App.limit(10).each{|app| %>
+      <li><%=app.name %></li>
+  <%    } %>
   <% end %>
 </ul>

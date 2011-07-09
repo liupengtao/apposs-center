@@ -1,1 +1,17 @@
-<%=@app.name %>
+<div>
+  <fieldset id="detail">
+  <p>应用信息</p>
+  <% %w{name}.each{|column| %>
+    <label><%=App.human_attribute_name column.to_sym %></label>
+    <span><%=@app.send column.to_sym %></span>
+  <% } %>
+  <p>应用所属机器列表</p>
+  <div id="machines">
+  <ul>
+  <% @app.machines.each{|machine| %>
+    <li><%=machine.name %></li>
+  <% } %>
+  </ul>
+  </div>
+  </fieldset>
+</div>

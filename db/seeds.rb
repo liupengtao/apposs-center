@@ -7,6 +7,7 @@
 #   Mayor.create(:name => 'Daley', :city => cities.first)
 
 app = App.create(:name => 'sample-app')
+app.machines << Machine.create(:name => 'tanx1.cnz')
 admin_role = Role.create(:name => 'Admin')
 pe_role = Role.create(:name => 'PE')
 appops_role = Role.create(:name => 'AppOPS')
