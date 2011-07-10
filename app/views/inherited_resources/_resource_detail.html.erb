@@ -1,9 +1,11 @@
 <table class="<%= resource_class.to_s.downcase %> detail">
-<% resource.attributes.each_pair do |attr, value| %>
+<% resource.attributes.each_key do |attr|
+	 attr_sym = attr.gsub(/_id/,'').to_sym
+%>
   <% next if ['id', 'created_at', 'updated_at'].include?(attr) %>
   <tr>
-    <th><%= resource_class.human_attribute_name attr.to_sym %></th>
-    <td><%= value %></td>
+    <th><%= resource_class.human_attribute_name attr_sym %></th>
+    <td><%= resource.send attr_sym %></td>
   </tr>
 <% end %>
 </table>
