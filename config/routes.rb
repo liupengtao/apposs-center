@@ -57,6 +57,7 @@ Apposs::Application.routes.draw do
     resources :apps
     resources :users
     resources :roles
+    resources :profiles
   end
 
   resources :machines

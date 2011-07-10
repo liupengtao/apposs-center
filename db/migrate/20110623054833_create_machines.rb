@@ -5,6 +5,8 @@ class CreateMachines < ActiveRecord::Migration
       t.string :host
       t.integer :room_id
       t.integer :app_id
+      t.string :user
+      t.string :password
 
       t.timestamps
     end

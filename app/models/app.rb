@@ -4,6 +4,7 @@ class App < ActiveRecord::Base
   has_many :machines
   has_many :commands
   
+  belongs_to :profile
  
   def to_s
   	send :name
