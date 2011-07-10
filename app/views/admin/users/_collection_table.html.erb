@@ -1,0 +1,21 @@
+<table class="<%= resource_class.to_s.downcase.pluralize %> collection">
+  <thead>
+    <tr>
+    <% controller.attributes.each do |field| %>
+      <th><%= resource_class.human_attribute_name field.to_sym %></th>
+    <% end %>
+    </tr>
+  </thead>
+  <tbody>
+  <% collection.each do |r| %>
+    <tr>
+    <% controller.attributes.each do |field| %>
+      <td><%= r.send field %></td>
+    <% end %>
+      <td><%= link_to "显示", resource_url(r) %></td>
+      <td><%= link_to "编辑", edit_resource_url(r) %></td>
+      <td><%= link_to "删除", resource_url(r), :confirm => '确定要删除?', :method => :delete %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

@@ -3,12 +3,26 @@ zh-CN:
     models:
       user: '用户'
       app: '应用'
+      machine: '机器'
+      room: '机房'
+      role: '角色'
     attributes:
       user:
         email: '邮箱'
         password: '密码'
         password_confirmation: '确认密码'
         remember_me: '下次访问自动登录'
+        last_sign_in_ip: '最近访问ip'
+        last_sign_in_at: '最近访问时间'
       app:
+        name: '名称'
+      machine:
+        name: '机器名称'
+        host: '机器地址'
+        room: '所属机房'
+        app: '所属应用'
+      role:
+      	name: '角色名'
+      room:
         name: '名称'
 

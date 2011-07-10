@@ -1,3 +1,3 @@
-class Admin::RolesController < InheritedResources::Base
+class Admin::RolesController < Admin::BaseController
   before_filter :authenticate_user!
 end
