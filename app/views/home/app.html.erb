@@ -3,7 +3,7 @@
 	<p>
 	  应用信息
       <% @app.profile.command_defs.each{|cdef| %>
-      <span><%=link_to cdef.name, :controller => 'home', :action => 'do_command', :id => cdef.id %></span> 
+      <span><%=link_to cdef.name, new_app_command_path(@app)+"?def=#{cdef.id}", :remote => true %></span> 
       <% }%>
 	</p>
   <% %w{name}.each{|column| %>

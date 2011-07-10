@@ -7,4 +7,5 @@ class HomeController < ApplicationController
   def app
     @app = current_user.apps.find params[:id]
   end
+  
 end
