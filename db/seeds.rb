@@ -6,10 +6,17 @@
 #   cities = City.create([{ :name => 'Chicago' }, { :name => 'Copenhagen' }])
 #   Mayor.create(:name => 'Daley', :city => cities.first)
 
-app = App.create(:name => 'sample-app')
+profile = Profile.create :name => 'jboss'
+
+profile.command_defs << CommandDef.create(:name => 'echo start')
+profile.command_defs << CommandDef.create(:name => 'echo stop')
+profile.command_defs << CommandDef.create(:name => 'echo redeploy')
+
+app = App.create(:name => 'sample-app', :profile => profile)
 app.machines << Machine.create(:name => 'tanx1.cnz',:host => 'localhost')
 app.machines << Machine.create(:name => 'tanx2.cnz',:host => 'test')
 Machine.create(:name => 'tanx3.cnz',:host => 'test')
+
 admin_role = Role.create(:name => 'Admin')
 pe_role = Role.create(:name => 'PE')
 appops_role = Role.create(:name => 'AppOPS')
@@ -20,9 +27,3 @@ Stakeholder.create :user => u, :app => app, :role => pe_role
 
 Room.first.machines << Machine.all
 
-profile = Profile.create :name => 'jboss'
-profile.command_defs << CommandDef.create(:name => 'start')
-profile.command_defs << CommandDef.create(:name => 'stop')
-profile.command_defs << CommandDef.create(:name => 'redeploy')
-
-app.update_attribute(:profile,profile)

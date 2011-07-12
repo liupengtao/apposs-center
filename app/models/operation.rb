@@ -9,10 +9,11 @@ class Operation < ActiveRecord::Base
   RUNNING = 2
   COMPLETED = 3
 
-  scope :downloaded, where(:status => DOWNLOADED)
-  scope :running, where(:status => RUNNING)
-  scope :completed, where(:status => COMPLETED)
-  scope :uncompleted, where('status <> ?',COMPLETED)
+  scope :inits, where(:status => INIT)
+  scope :downloads, where(:status => DOWNLOADED)
+  scope :runnings, where(:status => RUNNING)
+  scope :completes, where(:status => COMPLETED)
+  scope :uncompletes, where('status <> ?',COMPLETED)
   
   def download
     update_attribute :status, DOWNLOADED

@@ -10,7 +10,6 @@ class Command < ActiveRecord::Base
   	room_ids = machines.collect{|m| m.room_id }.uniq
   	room_map = Room.where(:id => room_ids).inject({}){|map,room| map.update(room.id => room.name)}
   	machines.collect{|m| 
-  	  p m.room_id
       Operation.create(
       	:machine_id => m.id,
       	:command => self,
