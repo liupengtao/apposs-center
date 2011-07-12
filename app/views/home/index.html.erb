@@ -1,7 +1,7 @@
 <ul>
   <% if current_user %>
   <%    current_user.apps.each{|app| %>
-      <li><%=link_to app.name, :controller => :home, :action => :app, :id => app.id %></li>
+      <li><%=link_to app, app_path(app) %></li>
   <%    } %>
   <% else %>
   <%    App.limit(10).each{|app| %>

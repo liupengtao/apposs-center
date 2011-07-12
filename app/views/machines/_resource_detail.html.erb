@@ -1,11 +1,20 @@
 <table class="<%= resource_class.to_s.downcase %> detail">
-<% resource.attributes.each_key do |attr|
-	 attr_sym = attr.gsub(/_id/,'').to_sym
-%>
-  <% next if ['id', 'created_at', 'updated_at'].include?(attr) %>
   <tr>
-    <th><%= resource_class.human_attribute_name attr_sym %></th>
-    <td><%= resource.send attr_sym %></td>
+    <th><%= resource_class.human_attribute_name :app %></th>
+    <td><%= link_to resource.app, app_path(resource.app) %></td>
+  </tr>
+<% [:host, :name, :room].each do |attr| %>
+  <tr>
+    <th><%= resource_class.human_attribute_name attr %></th>
+    <td><%= resource.send attr %></td>
   </tr>
 <% end %>
 </table>
+<div><label>当前执行命令</label>
+<ul>
+<% resource.commands.each{|o| %>
+  <li> <%=o.name %> </li>
+<% } %>
+</ul>
+</div>
+

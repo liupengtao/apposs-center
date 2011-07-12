@@ -3,12 +3,27 @@ class CreateOperations < ActiveRecord::Migration
     create_table :operations do |t|
       t.integer :command_id
       t.integer :machine_id
+      t.integer :status, :default => 0
+      t.text :response
 
+      # 冗余字段
+      t.integer :room_id
+      t.string :room_name
+      t.string :machine_host
+      t.string :command_name
+      
+      # 时间戳
       t.timestamps
     end
+    add_index :operations, ["machine_id"], :name => "index_operations_on_machine_id"
+    add_index :operations, ["status"], :name => "index_operations_on_status"
   end
 
   def self.down
+    change_table(:operations) do |t|
+      t.remove_index :index_operations_on_machine_id
+      t.remove_index :index_operations_on_status
+    end
     drop_table :operations
   end
 end

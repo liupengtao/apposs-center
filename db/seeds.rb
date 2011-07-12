@@ -8,8 +8,8 @@
 
 app = App.create(:name => 'sample-app')
 app.machines << Machine.create(:name => 'tanx1.cnz',:host => 'localhost')
-app.machines << Machine.create(:name => 'tanx1.cnz',:host => 'test')
-Machine.create(:name => 'tanx1.cnz',:host => 'test')
+app.machines << Machine.create(:name => 'tanx2.cnz',:host => 'test')
+Machine.create(:name => 'tanx3.cnz',:host => 'test')
 admin_role = Role.create(:name => 'Admin')
 pe_role = Role.create(:name => 'PE')
 appops_role = Role.create(:name => 'AppOPS')

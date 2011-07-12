@@ -5,11 +5,11 @@
     <th><%= resource_class.human_attribute_name attr.to_sym %></th>
     <td><%= value %></td>
   </tr>
+<% end %>
   <tr><td colspan="2" id="machines_title">机器列表：</td></tr>
   <% resource.machines.each{|machine| %>
   <tr>
   	<td colspan="2"><label><%=link_to machine.name, machine_path(machine) %></label></td>
-  <% }%>
   </tr>
-<% end %>
+  <% }%>
 </table>

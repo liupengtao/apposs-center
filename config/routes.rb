@@ -60,6 +60,7 @@ Apposs::Application.routes.draw do
     resources :profiles
   end
 
+  resources :apps
   resources :machines
   resources :rooms
   resources :apps do

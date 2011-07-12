@@ -24,7 +24,7 @@
 </head>
 <body>
 <span id="notice"><%=flash[:notice] %></span>
-<ul>
+<ul><li><%=link_to '首页', '/' %>
 	<% [App,Role,User].each{|res| %>
 	<li><%=link_to res.model_name.human, res.to_s.tableize %></li>
 	<% } %>

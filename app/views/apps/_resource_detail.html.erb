@@ -1,0 +1,29 @@
+<table class="<%= resource_class.to_s.downcase %> detail">
+<% resource.attributes.each_key do |attr|
+	 attr_sym = attr.gsub(/_id/,'').to_sym
+%>
+  <% next if ['id', 'created_at', 'updated_at'].include?(attr) %>
+  <tr>
+    <th><%= resource_class.human_attribute_name attr_sym %></th>
+    <td><%= resource.send attr_sym %></td>
+  </tr>
+<% end %>
+</table>
+
+<div>
+  <lable>支持命令</label>
+  <% @app.profile.command_defs.each{|cdef| %>
+  <span><%=link_to cdef.name, new_app_command_path(@app)+"?def=#{cdef.id}", :remote => true %></span> 
+  <% }%>
+</div>
+
+
+<div id="machines">
+  <label>机器列表</label>
+  <ul>
+<% resource.machines.each{|machine| %>
+    <li><%=link_to machine.name, machine_path(machine) %></li>
+<% } %>
+  </ul>
+</div>
+
