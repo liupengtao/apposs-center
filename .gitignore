@@ -3,7 +3,6 @@
 .project
 .idea
 nbproject
-config/database.yml
 log/*
 tmp/*
 db/*.sqlite3
