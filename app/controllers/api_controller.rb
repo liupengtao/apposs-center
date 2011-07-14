@@ -17,8 +17,8 @@ class ApiController < ApplicationController
   
   # {isok,atom_to_list(IsOk)},{host,Host},{oid,OperationId},{body,Body}
   def callback
-    Operation.where(:id => params[:oid]).first.update_attributes(
-        :isok => params[:isok], :response => params[:body]
+    Operation.where(:id => params[:oid]).first.complete(
+        "true"==params[:isok], params[:body]
     )
   	render :text => 'ok'
   end

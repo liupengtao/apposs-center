@@ -23,7 +23,7 @@ class Operation < ActiveRecord::Base
     update_attribute :status, RUNNING
   end
 
-  def done
-    update_attribute :status, COMPLETED
+  def complete( isok, body)
+    update_attributes :status => COMPLETED, :isok => isok, :response => body
   end
 end
