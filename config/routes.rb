@@ -58,13 +58,13 @@ Apposs::Application.routes.draw do
     resources :apps
     resources :users
     resources :roles
-    resources :profiles
+    resources :cmd_groups
   end
 
   resources :apps
   resources :machines
   resources :rooms
-  resources :profiles
+  resources :cmd_groups
   resources :apps do
   	resources :commands
   end

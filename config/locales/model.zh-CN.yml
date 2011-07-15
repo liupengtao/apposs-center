@@ -6,7 +6,7 @@ zh-CN:
       machine: '机器'
       room: '机房'
       role: '角色'
-      profile: '应用类型'
+      cmd_group: '命令组'
     attributes:
       user:
         email: '邮箱'
@@ -17,7 +17,7 @@ zh-CN:
         last_sign_in_at: '最近访问时间'
       app:
         name: '名称'
-        profile: '应用类型'
+        cmd_group: '应用类型'
       machine:
         name: '机器名称'
         host: '机器地址'
@@ -27,7 +27,7 @@ zh-CN:
       	name: '角色名'
       room:
         name: '名称'
-      profile:
+      cmd_group:
         name: '名称'
-        command_def: '预定义命令'
+        cmd_def: '预定义命令'
 

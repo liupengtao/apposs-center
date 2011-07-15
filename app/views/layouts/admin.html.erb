@@ -7,15 +7,14 @@
   <%= csrf_meta_tag %>
   <script type="text/javascript">
   	<!--
-  	function add_machine(button){
-  	  //遇到一个怪异的问题，form中动态添加的字段提交时就没了，不得以换个方式，写了一个很烂的实现
+  	function add_select(button,field){
       var form = button.form;
-      var options = form.elements['machine_name'].options;
+      var options = form.elements[field + '_name'].options;
       for(var i=0; i < options.length; i++){
         if(options[i].selected){
           var key = options[i].value;
           var value = options[i].innerHTML;
-          $('<tr><td colspan="2"><label><input id="machines_'+key+'" type="checkbox" name="app[machines][]" value="'+key+'" checked="checked" />'+value+'</label></td></tr>').insertBefore($(button).parent().parent());
+          $('<tr><td colspan="2"><label><input id="'+field+'s_'+key+'" type="checkbox" name="app['+field+'s][]" value="'+key+'" checked="checked" />'+value+'</label></td></tr>').insertBefore($(button).parent().parent());
         }
       }
   	}
@@ -25,7 +24,7 @@
 <body>
 <span id="notice"><%=flash[:notice] %></span>
 <ul><li><%=link_to '首页', '/' %>
-	<% [Profile,App,Role,User].each{|res| %>
+	<% [CmdGroup,App,Role,User].each{|res| %>
 	<li><%=link_to res.model_name.human, eval("admin_#{res.to_s.tableize}_path") %></li>
 	<% } %>
 	<% if current_user.nil? %>

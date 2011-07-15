@@ -19,20 +19,31 @@
     <td><%= App.human_attribute_name :name %></td>
     <td><%= f.text_field :name %></td>
   </tr>
+  <tr><td colspan="2" id="cmd_groups_title">命令组：</td></tr>
+  <% resource.cmd_groups.each{|cg| %>
   <tr>
-    <td><%= App.human_attribute_name :profile %></td>
-    <td><%= f.text_field :profile_id %></td>
+  	<td colspan="2"><label>
+  	  <input type="checkbox" name="app[cmd_groups][]" value="<%=cg.id %>" checked="checked"/><%=cg.name %></label></td>
   </tr>
+  <% }%>
+  <tr><td colspan="2">
+  	<%=select("cmd_group", "name", CmdGroup.all.collect{|cg| [cg.name, cg.id]})%>
+  	<input type="button" value="添加命令组" onclick="try {
+  		add_select(this,'cmd_group');
+  	}catch(e){
+  		e;
+  	}; void 0;" />
+  </td></tr>
   <tr><td colspan="2" id="machines_title">机器列表：</td></tr>
   <% resource.machines.each{|m| %>
   <tr>
   	<td colspan="2"><label><input type="checkbox" name="app[machines][]" value="<%=m.id %>" checked="checked"/><%=m.name %></label></td>
-  <% }%>
   </tr>
+  <% }%>
   <tr><td colspan="2">
   	<%=select("machine", "name", Machine.all.collect{|m| [m.name, m.id]})%>
   	<input type="button" value="添加机器" onclick="try {
-  		add_machine(this);
+  		add_select(this,'machine');
   	}catch(e){
   		e;
   	}; void 0;" />

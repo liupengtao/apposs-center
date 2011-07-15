@@ -3,19 +3,14 @@
     <th><%= resource_class.human_attribute_name :name %></th>
     <td><%= resource.name %></td>
   </tr>
-  <tr>
-    <th><%= resource_class.human_attribute_name :profile %></th>
-    <td><%= link_to resource.profile, profile_path(resource.profile) %></td>
-  </tr>
 </table>
 
 <div>
   <lable>支持命令</label>
-  <% @app.profile.command_defs.each{|cdef| %>
+  <% @app.all_cmd_defs.each{|cdef| %>
   <span><%=link_to cdef.name, new_app_command_path(@app)+"?def=#{cdef.id}", :remote => true %></span> 
   <% }%>
 </div>
-
 
 <div id="machines">
   <label>机器列表</label>

@@ -6,13 +6,15 @@
 #   cities = City.create([{ :name => 'Chicago' }, { :name => 'Copenhagen' }])
 #   Mayor.create(:name => 'Daley', :city => cities.first)
 
-profile = Profile.create :name => 'jboss'
+cmd_group = CmdGroup.create :name => 'jboss'
 
-profile.command_defs << CommandDef.create(:name => 'echo start')
-profile.command_defs << CommandDef.create(:name => 'echo stop')
-profile.command_defs << CommandDef.create(:name => 'echo redeploy')
+cmd_group2 = CmdGroup.create :name => 'nodejs'
 
-app = App.create(:name => 'sample-app', :profile => profile)
+cmd_group.cmd_defs << CmdDef.create(:name => 'echo start')
+cmd_group.cmd_defs << CmdDef.create(:name => 'echo stop')
+cmd_group.cmd_defs << CmdDef.create(:name => 'echo redeploy')
+
+app = App.create(:name => 'sample-app', :cmd_groups => [cmd_group])
 app.machines << Machine.create(:name => 'tanx1.cnz',:host => 'localhost')
 app.machines << Machine.create(:name => 'tanx2.cnz',:host => 'test')
 Machine.create(:name => 'tanx3.cnz',:host => 'test')
