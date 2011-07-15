@@ -5,7 +5,7 @@ Apposs::Application.routes.draw do
   root :to => 'home#index'
 
   get "home/index"
-
+  
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
@@ -54,6 +54,7 @@ Apposs::Application.routes.draw do
   #   end
 
   namespace :admin do
+  	root :to => 'apps#index'
     resources :apps
     resources :users
     resources :roles
@@ -63,6 +64,7 @@ Apposs::Application.routes.draw do
   resources :apps
   resources :machines
   resources :rooms
+  resources :profiles
   resources :apps do
   	resources :commands
   end

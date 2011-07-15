@@ -1,5 +1,5 @@
 class MachinesController < InheritedResources::Base
-  actions :all, :except => [ :edit, :update, :destroy, :new ]
+  actions :show
   
   def attributes
   	[[:name], [:room]]

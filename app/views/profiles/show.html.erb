@@ -1,0 +1,16 @@
+<h1><%= resource_class.model_name.human %></h1>
+
+<table class="profile detail">
+  <tr>
+    <th><%= resource_class.human_attribute_name :name %></th>
+    <td><%= resource.name %></td>
+  </tr>
+</table>
+<div><label>预定义命令</label>
+<ul>
+<% resource.command_defs.each{|c| %>
+  <li> <%=c.name %> </li>
+<% } %>
+</ul>
+</div>
+

@@ -15,13 +15,14 @@
     </td>
   </tr>
   <% end %>
-  <% resource.attributes.each_pair do |field, value| %>
-    <% next if ['id', 'created_at', 'updated_at'].include?(field) %>
   <tr>
-    <td><%= resource.class.human_attribute_name field.to_sym %></td>
-    <td><%= f.text_field field.to_sym %></td>
+    <td><%= App.human_attribute_name :name %></td>
+    <td><%= f.text_field :name %></td>
   </tr>
-  <% end %>
+  <tr>
+    <td><%= App.human_attribute_name :profile %></td>
+    <td><%= f.text_field :profile_id %></td>
+  </tr>
   <tr><td colspan="2" id="machines_title">机器列表：</td></tr>
   <% resource.machines.each{|m| %>
   <tr>

@@ -27,4 +27,7 @@ zh-CN:
       	name: '角色名'
       room:
         name: '名称'
+      profile:
+        name: '名称'
+        command_def: '预定义命令'
 

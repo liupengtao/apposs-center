@@ -3,6 +3,8 @@ class AppsController < InheritedResources::Base
   before_filter :authenticate_user!
 
   actions :all, :except => [ :edit, :update, :destroy, :new ]
+  
+  
 
   protected
     def collection

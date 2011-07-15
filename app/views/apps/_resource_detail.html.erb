@@ -1,13 +1,12 @@
-<table class="<%= resource_class.to_s.downcase %> detail">
-<% resource.attributes.each_key do |attr|
-	 attr_sym = attr.gsub(/_id/,'').to_sym
-%>
-  <% next if ['id', 'created_at', 'updated_at'].include?(attr) %>
+<table class="app detail">
   <tr>
-    <th><%= resource_class.human_attribute_name attr_sym %></th>
-    <td><%= resource.send attr_sym %></td>
+    <th><%= resource_class.human_attribute_name :name %></th>
+    <td><%= resource.name %></td>
   </tr>
-<% end %>
+  <tr>
+    <th><%= resource_class.human_attribute_name :profile %></th>
+    <td><%= link_to resource.profile, profile_path(resource.profile) %></td>
+  </tr>
 </table>
 
 <div>
