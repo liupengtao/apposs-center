@@ -1,11 +1,12 @@
 class HomeController < ApplicationController
-  before_filter :authenticate_user! , :except => [:index]
-  
+
+	respond_to :json, :except => [:index]
+
   def index
+  	render :layout => 'application'
   end
 
-  def app
-    @app = current_user.apps.find params[:id]
-  end
-  
+	def welcome
+    respond_with current_user
+	end
 end

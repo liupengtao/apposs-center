@@ -12,7 +12,7 @@ class ApiController < ApplicationController
   #{host,Host},{oid,OperationId}
   def run
     Operation.where(:id => params[:oid]).first.run
-    render :text => 'run'
+    render :text => 'ok'
   end
   
   # {isok,atom_to_list(IsOk)},{host,Host},{oid,OperationId},{body,Body}
