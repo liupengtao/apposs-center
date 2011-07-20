@@ -1,6 +1,4 @@
-class HomeController < ApplicationController
-
-	respond_to :json, :except => [:index]
+class HomeController < BaseController
 
   def index
   	render :layout => 'application'

@@ -8,4 +8,8 @@ class CommandsController < ApplicationController
   	@command.build_operations
   	respond_with(@command)
   end
+  
+  def index
+    respond_with current_app.commands
+  end
 end

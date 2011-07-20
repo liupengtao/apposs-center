@@ -1,13 +1,18 @@
-class AppsController < ApplicationController
+class AppsController < BaseController
+
   def index
-    render(:json => current_user.apps)
+    respond_with current_user.apps
   end
 
   def show
-    render(:json =>App.find(params[:id]))
+    respond_with current_app
   end
 
-  def cmd_def_list
-    render :json => App.find(params[:app_id]).cmd_defs
+  def cmd_defs
+    respond_with current_app.cmd_defs
+  end
+  
+  def cmd_sets
+    respond_with current_app.cmd_sets
   end
 end

@@ -14,10 +14,16 @@ cmd_group.cmd_defs << CmdDef.create(:name => 'echo start')
 cmd_group.cmd_defs << CmdDef.create(:name => 'echo stop')
 cmd_group.cmd_defs << CmdDef.create(:name => 'echo redeploy')
 
-app = App.create(:name => 'sample-app', :cmd_groups => [cmd_group])
+cmd_group2.cmd_defs << CmdDef.create( :name => 'echo start_nodejs')
+cmd_group2.cmd_defs << CmdDef.create( :name => 'echo stop_nodejs')
+
+app = App.create(:name => 'sample-app', :cmd_groups => [cmd_group], :cmd_defs => [CmdDef.last])
 app.machines << Machine.create(:name => 'tanx1.cnz',:host => 'localhost')
 app.machines << Machine.create(:name => 'tanx2.cnz',:host => 'test')
 Machine.create(:name => 'tanx3.cnz',:host => 'test')
+
+app.cmd_set_defs << CmdSetDef.create(:name => "upgrade package", :expression => '1,2,4')
+
 
 admin_role = Role.create(:name => 'Admin')
 pe_role = Role.create(:name => 'PE')
