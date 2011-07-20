@@ -13,19 +13,20 @@ Ext.onReady(function() {
     var appTabPanel = Ext.create('Ext.tab.Panel', {
         region: 'center',
         frame:true,
-        split:true,
-        title:'您的应用'
+        split:true
     });
 
     //Add Current User's Application to the appPanels array.
     function addAppTabPanel(name, id) {
-        var panel = {
+        //应用的左侧面板
+        var appLeftPanel = {
             title:name,
             layout:'vbox',
             frame:true,
             split:true,
             autoScroll:true,
             collapsible:true,
+            region:'west',
             items:[
                 {
                     title:'基本信息',
@@ -60,8 +61,104 @@ Ext.onReady(function() {
                 }
             ]
         }
-        appPanels[appPanels.length] = panel;
+
+        //应用的中心命令执行状态面板
+        //操作模型的定义
+        Ext.define('Operation', {
+            extend:'Ext.data.Model',
+            fields:['id','name','status']
+        });
+        //操作数据store的获取
+        var operationStore = Ext.create('Ext.data.Store', {
+            model:Operation,
+            proxy:{
+                type:'ajax',
+                url:'/apps/1/commands.json',
+                reader:{
+                    type:'json',
+                    record:'operation'
+                }
+            },
+            autoLoad:true
+        })
+        var appCenterPanel = {
+            xtype:'gridpanel',
+            store:operationStore,
+            frame:true,
+            region:'center',
+            title:'当前应用的命令执行状态',
+            columns: [
+                {
+                    header:'命令名',
+                    dataIndex:'name'
+                },
+                {
+                    header:'命令执行状态',
+                    dataIndex:'status'
+                }
+            ]
+        }
+        //应用的总面板
+        var appPanel = {
+            title:name,
+            xtype:'panel',
+            layout:'border',
+            split:true,
+            collapsible:true,
+            items:[
+                appLeftPanel,
+                appCenterPanel
+            ]
+        }
+        appPanels[appPanels.length] = appPanel;
     }
+
+    var cmdSetStore = Ext.create('Ext.data.Store', {
+        fields: ['id', 'name'],
+        data : [
+            {"id":"1", "name":"Apache"},
+            {"id":"2", "name":"Glassfish"},
+            {"id":"3", "name":"Weblogic"}
+        ]
+    });
+
+    var addCmdGroupWindow = Ext.create('Ext.Window', {
+        title:'增加命令组',
+        width:250,
+        height:200,
+        items:[
+            Ext.create('Ext.form.Panel', {
+                labelWidth:60,
+                labelAlign:'right',
+                frame:true,
+                height:170,
+                items:[
+                    Ext.create('Ext.form.field.ComboBox', {
+                        fieldLabel:'命令组',
+                        store:cmdSetStore,
+                        queryMode:'local',
+                        displayField:'name',
+                        valueField:'id',
+                        anchor:'95%',
+                        margin:'20 0 0 10',
+                        autoScroll:true,
+                        blankText:'请选择命令组...',
+                        emptyText:'请选择命令组...',
+                        editable:false,
+                        allowBlank:false
+                    })
+                ],
+                buttons:[
+                    {
+                        text:'增加',
+                        handler:function() {
+                            
+                        }
+                    }
+                ]
+            })
+        ]
+    });
 
     //Request Current User's Applications
     Ext.Ajax.request({
@@ -78,7 +175,7 @@ Ext.onReady(function() {
                 //此处获取App的机器列表，url为apps/:id/machines
                 (function(id) {
                     Ext.Ajax.request({
-                        url:'/machines.json',
+                        url:'/apps/1/machines.json',
                         callback:function(options, success, response) {
                             var machinesStr = response.responseText;
                             var machines = Ext.decode(machinesStr);
@@ -97,7 +194,7 @@ Ext.onReady(function() {
                 //此处获取App的命令集列表，url为apps/:id/cmd_sets
                 (function(id) {
                     Ext.Ajax.request({
-                        url:'/command_set.json',
+                        url:'/apps/' + id + '/cmd_sets.json',
                         callback:function(options, success, response) {
                             var cmdSetStr = response.responseText;
                             var cmdSet = Ext.decode(cmdSetStr);
@@ -118,7 +215,22 @@ Ext.onReady(function() {
                                         {
                                             columnWidth:0.5,
                                             xtype:'button',
-                                            text:'执行'
+                                            text:'执行',
+                                            handler:function() {
+                                                Ext.Msg.alert('提示','命令已下发');
+                                                //发送执行Ajax请求，url为apps/:id/cmd_sets/cmd_set_def_id
+                                                Ext.Ajax.request({
+                                                    url:'/apps/' + id + '/cmd_sets',
+                                                    params:{
+                                                        cmd_set_def_id:(function(cmd_set_def_id) {
+                                                            return cmd_set_def_id;
+                                                        })(j)
+                                                    },
+                                                    callback:function(options, success, response) {
+
+                                                    }
+                                                });
+                                            }
                                         }
                                     ]
                                 }
@@ -130,7 +242,7 @@ Ext.onReady(function() {
                 //此处获取App的命令组列表，url为apps/:id/cmd_groups
                 (function(id) {
                     Ext.Ajax.request({
-                        url:'/command_group.json',
+                        url:'/apps/1/cmd_groups.json',
                         callback:function(options, success, response) {
                             var cmdGroupStr = response.responseText;
                             var cmdGroup = Ext.decode(cmdGroupStr);
@@ -174,7 +286,10 @@ Ext.onReady(function() {
                                     {
                                         columnWidth:0.5,
                                         xtype:'button',
-                                        text:'增加'
+                                        text:'增加',
+                                        handler:function() {
+                                            addCmdGroupWindow.show();
+                                        }
                                     }
                                 ]
                             }
