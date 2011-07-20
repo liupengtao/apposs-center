@@ -67,6 +67,9 @@ Apposs::Application.routes.draw do
     resources :machines
     resources :commands
     resources :cmd_set_defs
+  end
+  
+  resources :cmd_set_defs do
     resources :cmd_sets
   end
 
