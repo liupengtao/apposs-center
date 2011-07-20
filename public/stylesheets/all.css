@@ -1,0 +1,11 @@
+/* Style for application.html.erb */
+#notice {
+    margin-left: 500px;
+    display: block;
+    font-size: 18px;
+    float: left;
+}
+
+ul#welcome_info {
+    float: right;
+}
