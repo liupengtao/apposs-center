@@ -61,12 +61,13 @@ Apposs::Application.routes.draw do
     resources :cmd_groups
   end
 
+  resources :cmd_groups
+
   resources :apps do
     resources :machines
     resources :commands
     resources :cmd_set_defs
     resources :cmd_sets
-    resources :cmd_groups
   end
 
     # You can have the root of your site routed with "root"

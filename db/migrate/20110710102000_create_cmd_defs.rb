@@ -13,16 +13,9 @@ class CreateCmdDefs < ActiveRecord::Migration
       t.timestamps
     end
     
-    create_table :app_cmd_defs, :id => false do |t|
-      t.integer :cmd_def_id
-      t.integer	:app_id
-      
-      t.timestamps
-    end
   end
 
   def self.down
     drop_table :cmd_defs
-    drop_table :app_cmd_defs
   end
 end
