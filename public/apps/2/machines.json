@@ -1,0 +1,16 @@
+[
+    {
+        "machine":{
+            "id":1,
+            "name":"tanx1.cnz",
+            "host":"localhost"
+        }
+    },
+    {
+        "machine":{
+            "id":2,
+            "name":"tanx2.cnz",
+            "host":"test"
+        }
+    }
+]
