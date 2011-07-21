@@ -5,7 +5,7 @@ class AppsController < BaseController
   end
 
   def show
-    respond_with current_app
+    respond_with current_user.apps.find(params[:id])
   end
 
   def copy_cmd_defs

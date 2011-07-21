@@ -1,4 +1,4 @@
-class CommandsController < ApplicationController
+class CommandsController < BaseController
 
   respond_to :js
   
