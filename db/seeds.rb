@@ -3,8 +3,8 @@
 #
 # Examples:
 #
-#   cities = City.create([{ :name => 'Chicago' }, { :name => 'Copenhagen' }])
-#   Mayor.create(:name => 'Daley', :city => cities.first)
+# cities = City.create([{ :name => 'Chicago' }, { :name => 'Copenhagen' }])
+# Mayor.create(:name => 'Daley', :city => cities.first)
 
 cmd_group = CmdGroup.create :name => 'jboss'
 
@@ -34,4 +34,3 @@ Stakeholder.create :user => u, :app => app, :role => pe_role
 %w{cnz cm3 cm4}.each{|name| Room.create(:name => name)}
 
 Room.first.machines << Machine.all
-

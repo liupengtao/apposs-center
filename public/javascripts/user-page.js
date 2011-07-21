@@ -16,6 +16,13 @@ Ext.onReady(function() {
         split:true
     });
 
+    //应用的中心命令执行状态面板
+    //操作模型的定义
+    Ext.define('Operation', {
+        extend:'Ext.data.Model',
+        fields:['id','name','status']
+    });
+
     //Add Current User's Application to the appPanels array.
     function addAppTabPanel(name, id) {
         //应用的左侧面板
@@ -30,7 +37,7 @@ Ext.onReady(function() {
             items:[
                 {
                     title:'基本信息',
-                    width:300,
+                    width:400,
                     flex:1,
                     frame:true,
                     items:[
@@ -46,7 +53,7 @@ Ext.onReady(function() {
                 {
                     title:'命令集',
                     flex:1,
-                    width:300,
+                    width:400,
                     id:'commands' + id,
                     layout:'anchor',
                     frame:true
@@ -54,18 +61,12 @@ Ext.onReady(function() {
             ]
         }
 
-        //应用的中心命令执行状态面板
-        //操作模型的定义
-        Ext.define('Operation', {
-            extend:'Ext.data.Model',
-            fields:['id','name','status']
-        });
         //操作数据store的获取
         var operationStore = Ext.create('Ext.data.Store', {
             model:Operation,
             proxy:{
                 type:'ajax',
-                url:'/apps/1/commands.json',
+                url:'apps/' + id + '/commands',
                 reader:{
                     type:'json',
                     record:'operation'
@@ -105,19 +106,10 @@ Ext.onReady(function() {
         appPanels[appPanels.length] = appPanel;
     }
 
-    var cmdSetStore = Ext.create('Ext.data.Store', {
-        fields: ['id', 'name'],
-        data : [
-            {"id":"1", "name":"Apache"},
-            {"id":"2", "name":"Glassfish"},
-            {"id":"3", "name":"Weblogic"}
-        ]
-    });
-
     //构造iframe标签
     function getIFrameForEditCmdSet(url, width, height) {
         return '<iframe src="' + url + ' " width="' + width + '" height="' + height + '"' +
-        '></iframe>'
+            '></iframe>'
     }
 
     //Request Current User's Applications
@@ -131,11 +123,11 @@ Ext.onReady(function() {
             }
             appTabPanel.add(appPanels);//Add to addTabPanel
 
-            for (var i = 0; i <= obj.length; i++) {//此处还有点问题,有待解决
+            for (var i = 0; i < obj.length; i++) {
                 //此处获取App的机器列表，url为apps/:id/machines
                 (function(id) {
                     Ext.Ajax.request({
-                        url:'/apps/1/machines.json',
+                        url:'/apps/' + (id + 1) + '/machines',
                         callback:function(options, success, response) {
                             var machinesStr = response.responseText;
                             var machines = Ext.decode(machinesStr);
@@ -147,18 +139,17 @@ Ext.onReady(function() {
                                     columnWidth:1
                                 }
                             }
-                            Ext.getCmp('machines' + id).add(machinesListLabel);
+                            Ext.getCmp('machines' + (id + 1)).add(machinesListLabel);
                         }
                     });
                 })(i);
-                //此处获取App的命令集列表，url为apps/:id/cmd_sets
+                //此处获取App的命令集列表，url为apps/:id/cmd_set_defs
                 (function(id) {
                     Ext.Ajax.request({
-                        url:'/apps/' + id + '/cmd_set_defs.json',
+                        url:'/apps/' + (id + 1) + '/cmd_set_defs',
                         callback:function(options, success, response) {
                             var cmdSetStr = response.responseText;
                             var cmdSet = Ext.decode(cmdSetStr);
-
                             var cmdSetPanel = [];
                             for (var j = 0,len = cmdSet.length; j < len; j++) {
                                 var columnCount = cmdSet[j].actions.length + 1;
@@ -174,20 +165,20 @@ Ext.onReady(function() {
                                         xtype:'button',
                                         text:cmdSet[j].actions[k - 1].name,
                                         handler:
-                                            (function(url, method, type, cmdSetId) {
+                                            (function(url, method, type) {
                                                 return function() {
                                                     Ext.Ajax.request({
                                                         url:url,
                                                         method:method,
-                                                        params:{
-                                                            cmd_set_def_id:cmdSetId
-                                                        },
+//                                                        params:{
+//                                                            cmd_set_def_id:cmdSetId
+//                                                        },
                                                         callback:(function(type) {
                                                             return function(options, success, response) {
+                                                                alert(response.responseText)
                                                                 if (type == 'simple') {
                                                                     Ext.Msg.alert('消息', response.responseText);
                                                                 } else if (type == 'multi') {
-                                                                    alert(response.responseText)
                                                                     var respondUrl = Ext.decode(response.responseText).url;
                                                                     var multiWin = Ext.create('Ext.Window', {
                                                                         width:window.innerWidth - 300,
@@ -206,7 +197,7 @@ Ext.onReady(function() {
                                                         })(type)
                                                     })
                                                 }
-                                            })(cmdSet[j].actions[k - 1].url, cmdSet[j].actions[k - 1].method, cmdSet[j].actions[k - 1].type, cmdSet[j].id)
+                                            })(cmdSet[j].actions[k - 1].url, cmdSet[j].actions[k - 1].method, cmdSet[j].actions[k - 1].type)
                                     }
                                 }
                                 cmdSetPanel[cmdSetPanel.length] = {
@@ -220,7 +211,7 @@ Ext.onReady(function() {
                                     ]
                                 }
                             }
-                            Ext.getCmp('commands' + id).add(cmdSetPanel);
+                            Ext.getCmp('commands' + (id + 1)).add(cmdSetPanel);
                         }
                     });
                 })(i);

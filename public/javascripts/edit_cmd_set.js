@@ -10,7 +10,7 @@ Ext.onReady(function() {
     //请求获取命令组数据并解析
     var cmdGroupNodes = [];
     Ext.Ajax.request({
-        url:'/command_groups.json',
+        url:'/command_groups',
         callback:function(options, success, response) {
             var cmdGroups = Ext.decode(response.responseText);
             for (var i = 0; i < cmdGroups.length; i++) {
