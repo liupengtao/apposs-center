@@ -1,0 +1,14 @@
+[
+    {
+        "cmd_group":{
+            "id":1,
+            "name":"jboss"
+        }
+    },
+    {
+        "cmd_group":{
+            "id":2,
+            "name":"nodejs"
+        }
+    }
+]

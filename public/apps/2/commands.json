@@ -1,0 +1,23 @@
+[
+    {
+        "operation":{
+            "id":1,
+            "name":"Start",
+            "status":"未开始"
+        }
+    },
+    {
+        "operation":{
+            "id":2,
+            "name":"Stop",
+            "status":"执行中"
+        }
+    },
+    {
+        "operation":{
+            "id":3,
+            "name":"Deploy",
+            "status":"执行结束"
+        }
+    }
+]

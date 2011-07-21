@@ -50,14 +50,6 @@ Ext.onReady(function() {
                     id:'commands' + id,
                     layout:'anchor',
                     frame:true
-                },
-                {
-                    title:'命令组',
-                    flex:1,
-                    id:'cmdGroup' + id,
-                    width:300,
-                    layout:'anchor',
-                    frame:true
                 }
             ]
         }
@@ -80,7 +72,7 @@ Ext.onReady(function() {
                 }
             },
             autoLoad:true
-        })
+        });
         var appCenterPanel = {
             xtype:'gridpanel',
             store:operationStore,
@@ -97,7 +89,7 @@ Ext.onReady(function() {
                     dataIndex:'status'
                 }
             ]
-        }
+        };
         //应用的总面板
         var appPanel = {
             title:name,
@@ -109,7 +101,7 @@ Ext.onReady(function() {
                 appLeftPanel,
                 appCenterPanel
             ]
-        }
+        };
         appPanels[appPanels.length] = appPanel;
     }
 
@@ -122,43 +114,11 @@ Ext.onReady(function() {
         ]
     });
 
-    var addCmdGroupWindow = Ext.create('Ext.Window', {
-        title:'增加命令组',
-        width:250,
-        height:200,
-        items:[
-            Ext.create('Ext.form.Panel', {
-                labelWidth:60,
-                labelAlign:'right',
-                frame:true,
-                height:170,
-                items:[
-                    Ext.create('Ext.form.field.ComboBox', {
-                        fieldLabel:'命令组',
-                        store:cmdSetStore,
-                        queryMode:'local',
-                        displayField:'name',
-                        valueField:'id',
-                        anchor:'95%',
-                        margin:'20 0 0 10',
-                        autoScroll:true,
-                        blankText:'请选择命令组...',
-                        emptyText:'请选择命令组...',
-                        editable:false,
-                        allowBlank:false
-                    })
-                ],
-                buttons:[
-                    {
-                        text:'增加',
-                        handler:function() {
-                            
-                        }
-                    }
-                ]
-            })
-        ]
-    });
+    //构造iframe标签
+    function getIFrameForEditCmdSet(url, width, height) {
+        return '<iframe src="' + url + ' " width="' + width + '" height="' + height + '"' +
+        '></iframe>'
+    }
 
     //Request Current User's Applications
     Ext.Ajax.request({
@@ -194,12 +154,61 @@ Ext.onReady(function() {
                 //此处获取App的命令集列表，url为apps/:id/cmd_sets
                 (function(id) {
                     Ext.Ajax.request({
-                        url:'/apps/' + id + '/cmd_sets.json',
+                        url:'/apps/' + id + '/cmd_set_defs.json',
                         callback:function(options, success, response) {
                             var cmdSetStr = response.responseText;
                             var cmdSet = Ext.decode(cmdSetStr);
+
                             var cmdSetPanel = [];
                             for (var j = 0,len = cmdSet.length; j < len; j++) {
+                                var columnCount = cmdSet[j].actions.length + 1;
+                                var cmdSetPanelCmps = [];
+                                cmdSetPanelCmps[cmdSetPanelCmps.length] = {
+                                    xtype:'label',
+                                    columnWidth:1 / columnCount,
+                                    html:cmdSet[j].name
+                                };
+                                for (var k = 1; k < columnCount; k++) {
+                                    cmdSetPanelCmps[cmdSetPanelCmps.length] = {
+                                        columnWidth:1 / columnCount,
+                                        xtype:'button',
+                                        text:cmdSet[j].actions[k - 1].name,
+                                        handler:
+                                            (function(url, method, type, cmdSetId) {
+                                                return function() {
+                                                    Ext.Ajax.request({
+                                                        url:url,
+                                                        method:method,
+                                                        params:{
+                                                            cmd_set_def_id:cmdSetId
+                                                        },
+                                                        callback:(function(type) {
+                                                            return function(options, success, response) {
+                                                                if (type == 'simple') {
+                                                                    Ext.Msg.alert('消息', response.responseText);
+                                                                } else if (type == 'multi') {
+                                                                    alert(response.responseText)
+                                                                    var respondUrl = Ext.decode(response.responseText).url;
+                                                                    var multiWin = Ext.create('Ext.Window', {
+                                                                        width:window.innerWidth - 300,
+                                                                        height:window.innerHeight - 300,
+                                                                        autoScroll:true,
+                                                                        items:[
+                                                                            {
+                                                                                autoScroll:true,
+                                                                                html:getIFrameForEditCmdSet(respondUrl, window.innerWidth - 300, window.innerHeight - 300)
+                                                                            }
+                                                                        ]
+                                                                    });
+                                                                    multiWin.show();
+                                                                }
+                                                            }
+                                                        })(type)
+                                                    })
+                                                }
+                                            })(cmdSet[j].actions[k - 1].url, cmdSet[j].actions[k - 1].method, cmdSet[j].actions[k - 1].type, cmdSet[j].id)
+                                    }
+                                }
                                 cmdSetPanel[cmdSetPanel.length] = {
                                     xtype:'panel',
                                     border:false,
@@ -207,93 +216,11 @@ Ext.onReady(function() {
                                     anchor:'100%',
                                     frame:true,
                                     items: [
-                                        {
-                                            xtype:'label',
-                                            columnWidth:1 / 2,
-                                            html:cmdSet[j].command.name
-                                        },
-                                        {
-                                            columnWidth:0.5,
-                                            xtype:'button',
-                                            text:'执行',
-                                            handler:function() {
-                                                Ext.Msg.alert('提示','命令已下发');
-                                                //发送执行Ajax请求，url为apps/:id/cmd_sets/cmd_set_def_id
-                                                Ext.Ajax.request({
-                                                    url:'/apps/' + id + '/cmd_sets',
-                                                    params:{
-                                                        cmd_set_def_id:(function(cmd_set_def_id) {
-                                                            return cmd_set_def_id;
-                                                        })(j)
-                                                    },
-                                                    callback:function(options, success, response) {
-
-                                                    }
-                                                });
-                                            }
-                                        }
+                                        cmdSetPanelCmps
                                     ]
                                 }
                             }
                             Ext.getCmp('commands' + id).add(cmdSetPanel);
-                        }
-                    });
-                })(i);
-                //此处获取App的命令组列表，url为apps/:id/cmd_groups
-                (function(id) {
-                    Ext.Ajax.request({
-                        url:'/apps/1/cmd_groups.json',
-                        callback:function(options, success, response) {
-                            var cmdGroupStr = response.responseText;
-                            var cmdGroup = Ext.decode(cmdGroupStr);
-                            var cmdGroupPanel = [];
-                            for (var j = 0,len = cmdGroup.length; j < len; j++) {
-                                cmdGroupPanel[cmdGroupPanel.length] = {
-                                    xtype:'panel',
-                                    border:false,
-                                    layout:'column',
-                                    anchor:'100%',
-                                    id:'cmdGroup' + id + j,
-                                    frame:true,
-                                    items: [
-                                        {
-                                            xtype:'label',
-                                            columnWidth:1 / 2,
-                                            html:cmdGroup[j].cmd_group.name
-                                        },
-                                        {
-                                            columnWidth:0.5,
-                                            xtype:'button',
-                                            id:'deleteCmdGroupButton' + id + j,
-                                            text:'删除'
-                                        }
-                                    ]
-                                }
-                            }
-
-                            cmdGroupPanel[cmdGroupPanel.length] = {
-                                xtype:'panel',
-                                border:false,
-                                layout:'column',
-                                anchor:'100%',
-                                frame:true,
-                                items: [
-                                    {
-                                        xtype:'label',
-                                        columnWidth:1 / 2,
-                                        html:'&nbsp;'
-                                    },
-                                    {
-                                        columnWidth:0.5,
-                                        xtype:'button',
-                                        text:'增加',
-                                        handler:function() {
-                                            addCmdGroupWindow.show();
-                                        }
-                                    }
-                                ]
-                            }
-                            Ext.getCmp('cmdGroup' + id).add(cmdGroupPanel);
                         }
                     });
                 })(i);
