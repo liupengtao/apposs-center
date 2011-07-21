@@ -19,7 +19,4 @@ class App < ActiveRecord::Base
     CmdSet.where(:cmd_set_def_id => cmd_set_defs.select(:id).collect{|o| o.id})
   end
 
-  def cmd_defs
-    CmdDef.where( :id => cmd_groups.all.collect{|cg| cg.id})
-  end
 end

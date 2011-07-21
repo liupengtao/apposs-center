@@ -5,6 +5,6 @@ class BaseController < ApplicationController
   respond_to :json
 
   def current_app
-    current_user.apps.where(:id => params[:id]).first||App.new
+    current_user.apps.where(:id => params[:app_id]).first||App.new
   end
 end

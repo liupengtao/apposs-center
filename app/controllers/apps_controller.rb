@@ -8,14 +8,6 @@ class AppsController < BaseController
     respond_with current_user.apps.find(params[:id])
   end
 
-  def copy_cmd_defs
-    respond_with current_app.copy_cmd_defs
-  end
-  
-  def cmd_defs
-    respond_with current_app.cmd_defs
-  end
-  
   def cmd_sets
     respond_with current_app.cmd_sets
   end
