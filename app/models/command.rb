@@ -1,6 +1,8 @@
 class Command < ActiveRecord::Base
   belongs_to :operator, :class_name => 'User'
   belongs_to :app
+  belongs_to :cmd_set
+  belongs_to :cmd_def
   has_many :options
   has_many :operations
   has_many :related_machines, :through => :operations, :class_name => 'Machine'
