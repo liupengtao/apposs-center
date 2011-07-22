@@ -1,11 +1,9 @@
 class CreateCommands < ActiveRecord::Migration
   def self.up
     create_table :commands do |t|
-      t.string :name
-      t.integer :operator_id
-      t.integer :app_id
       t.integer :cmd_def_id
       t.integer :cmd_set_id
+      t.boolean :next_when_fail
       t.timestamps
     end
   end

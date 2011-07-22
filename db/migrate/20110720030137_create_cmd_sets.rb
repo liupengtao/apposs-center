@@ -2,7 +2,7 @@ class CreateCmdSets < ActiveRecord::Migration
   def self.up
     create_table :cmd_sets do |t|
       t.integer :cmd_set_def_id
-      t.integer :owner_id
+      t.integer :operator_id
 
       t.timestamps
     end

@@ -4,7 +4,7 @@ class CreateOperations < ActiveRecord::Migration
       t.integer :command_id
       t.integer :machine_id
       t.integer :status, :default => 0
-      t.boolean :isok
+      t.boolean :isok, :default => false
       t.text :response
 
       # 冗余字段

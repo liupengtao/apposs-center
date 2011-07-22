@@ -3,12 +3,9 @@ class CmdSet < ActiveRecord::Base
   
   has_many :commands
 
-  belongs_to :user, :foreign_key => 'owner_id'
+  belongs_to :operator, :class_name => 'User'
   
-  def after_save
-    app_id = cmd_set_def.app.id # 出于性能考虑缓存 id
-    cmd_set_def.cmd_defs.collect{|cmd_def|
-      Command.create(:app_id => app_id, :cmd_def => cmd_def, :cmd_set_id => id)
-    }
+  def after_create
+    cmd_set_def.build_commands self.id
   end
 end
