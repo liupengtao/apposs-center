@@ -1,11 +1,21 @@
 <html>
 <head>
-  <title></title>
+  <title><%= @cmd_set_def.app %></title>
   <link href="/stylesheets/resources/css/ext-all.css" rel="stylesheet" type="text/css"/>
   <script type="text/javascript" src="/javascripts/ext-all.js"></script>
   <script type="text/javascript" src="/javascripts/ext-lang-zh_CN.js"></script>
-  <script type="text/javascript" src="/javascripts/edit_cmd_set.js"></script>
 </head>
 <body>
+<input type="hidden" id="app_id" value="<%= @cmd_set_def.app.id %>"/>
+<input type="hidden" id="app_name" value="<%= @cmd_set_def.app.name %>"/>
+<input type="hidden" id="cmd_set_def_id" value="<%= @cmd_set_def.id %>"/>
+
+<input type="hidden" id="cmd_set_def_name" value="<%= @cmd_set_def.name %>"/>
+<select id="cmd_set_def_expression" style="display: none;">
+  <% @cmd_set_def.expression.split(',').each do |cmd_def_id| %>
+      <option value="<%= cmd_def_id %>"><%= CmdDef.find(cmd_def_id.to_i).name %></option>
+  <% end %>
+</select>
+<script type="text/javascript" src="/javascripts/edit_cmd_set.js"></script>
 </body>
 </html>
