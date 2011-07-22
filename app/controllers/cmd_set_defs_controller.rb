@@ -13,7 +13,12 @@ class CmdSetDefsController < BaseController
     @cmd_set_def = current_app.cmd_set_defs.find(params[:id])
     render 
   end
-  
+
+  def edit
+    @cmd_set_def = current_app.cmd_set_defs.find(params[:id])
+    render
+  end
+
   def create
     obj = current_app.cmd_set_defs.create :name => params[:name], :expression => params[:expression]
     respond_with obj
