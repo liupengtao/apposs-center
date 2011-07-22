@@ -1,24 +1,8 @@
-[
-    {
-        "app_id":1,
-        "created_at":"2011-07-21T18:02:44+08:00",
-        "expression":"1,2,4",
-        "id":1,
-        "name":"upgrade package",
-        "updated_at":"2011-07-21T18:02:44+08:00",
-        "actions":[
-            {
-                "name":"\u6267\u884c",
-                "url":"/cmd_set_defs/1/cmd_sets",
-                "type":"simple",
-                "method":"POST"
-            },
-            {
-                "name":"\u4fee\u6539",
-                "url":"/apps/1/cmd_set_defs/1/edit",
-                "type":"multi",
-                "method":"GET"
-            }
-        ]
-    }
-]
+{"cmd_set_def":{
+    "app_id":1,
+    "created_at":"2011-07-22T09:31:54+08:00",
+    "expression":"1,2,4",
+    "id":1,
+    "name":"upgrade package",
+    "updated_at":"2011-07-22T09:31:54+08:00"
+}}
