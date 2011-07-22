@@ -4,8 +4,7 @@ class CmdSetsController < BaseController
   end
   
   def create
-    @cmd_set = current_app.cmd_sets.create( :cmd_set_def_id => params[:cmd_set_def_id] )
-    @cmd_set.build_command
+    @cmd_set = current_app.cmd_sets.create( :cmd_set_def_id => params[:cmd_set_def_id], :user => current_user )
     respond_with @cmd_set
   end
 end
