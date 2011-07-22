@@ -50,7 +50,7 @@ Ext.onReady(function() {
                     }
                 ]
             });
-
+            
             //系统所有的命令组树
             var cmdGroupTreePanel = Ext.create('Ext.tree.Panel', {
                 title: '当前系统所有命令',
@@ -64,12 +64,19 @@ Ext.onReady(function() {
                     }
                 },
                 listeners:{
-                    beforeitemmove:function() {
-//                        cmdGroupStore.reload();
+                    beforeremove:function() {
+                var n = e.dropNode; // the node that was dropped
+                var copy = new xt.TreeNode( // copy it
+                  Ext.apply({}, n.attributes)
+                );
+                e.dropNode = copy; // assign the copy as the new dropNode
                     }
                 }
             });
-
+            cmdGroupTreePanel.on("itemremove", function(parent,node){
+                var new_node = node.copy(node.id+"_clone");
+                parent.appendChild(new_node);
+            });
             for (var p in cmdGroupTreePanel.dragZone) {
                 alert(p + ':' + cmdGroupTreePanel.dragZone[p])
             }
