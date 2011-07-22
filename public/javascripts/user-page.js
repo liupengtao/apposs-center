@@ -175,7 +175,6 @@ Ext.onReady(function() {
 //                                                        },
                                                         callback:(function(type) {
                                                             return function(options, success, response) {
-                                                                alert(response.responseText)
                                                                 if (type == 'simple') {
                                                                     Ext.Msg.alert('消息', response.responseText);
                                                                 } else if (type == 'multi') {
