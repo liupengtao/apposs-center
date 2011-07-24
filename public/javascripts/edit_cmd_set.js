@@ -51,7 +51,7 @@ Ext.onReady(function() {
                     }
                 ]
             });
-            
+
             //系统所有的命令组树
             var cmdGroupTreePanel = Ext.create('Ext.tree.Panel', {
                 title: '当前系统所有命令',
@@ -147,6 +147,7 @@ Ext.onReady(function() {
             var cmdSetTreePanel = Ext.create('Ext.tree.Panel', {
                 title:'命令包所有命令',
                 collapsible:true,
+                region:'center',
                 rootVisible:false,
                 viewConfig: {
                     plugins: {
@@ -155,7 +156,16 @@ Ext.onReady(function() {
                 },
                 store:cmdSetTreeStore,
                 listeners:{
-                    itemclick:function(view, record, item, index, e) {
+                    //向命令包中增加命令
+                    iteminsert:function(parent, node, refNode) {
+                        updateCmdSet(node);
+                    },
+                    itemappend:function(parent, node, index) {
+                        updateCmdSet(node);
+                    },
+                    itemmove:function(node) {
+                        alert(node.data.allowFailure)
+                        updateCmdSet();
                     }
                 },
                 columns: [
@@ -169,9 +179,8 @@ Ext.onReady(function() {
                         text: '允许失败',
                         dataIndex: 'allowFailure',
                         listeners:{
-                            checkchange:function(column,number,checked) {
-                                var view = cmdSetTreePanel.getView();
-                                alert(view.getRecord(view.getNode(number)).raw.text)
+                            checkchange:function(column, number, checked) {
+                                updateCmdSet();
                             }
                         }
                     },
@@ -181,8 +190,12 @@ Ext.onReady(function() {
                         items: [
                             {
                                 icon   : '/images/delete.gif',
-                                tooltip: 'Sell stock',
-                                handler: function(grid, rowIndex, colIndex) {
+                                tooltip: '删除当前命令',
+                                handler: function(tree, rowIndex, colIndex) {
+                                    var root = this.up('treepanel').getRootNode();
+                                    var nodeToDeleted = root.getChildAt(rowIndex);
+                                    nodeToDeleted.remove();
+                                    updateCmdSet();
                                 }
                             }
                         ]

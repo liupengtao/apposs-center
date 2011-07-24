@@ -1,0 +1,12 @@
+.x-grid-checkheader {
+    height: 14px;
+    background: transparent url('/images/unchecked.gif') no-repeat 50% -2px;
+}
+
+.x-grid-checkheader-checked {
+    background-image: url('/images/checked.gif');
+}
+
+.x-grid-checkheader-editor .x-form-cb-wrap {
+    text-align: center;
+}

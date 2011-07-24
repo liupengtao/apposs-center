@@ -2,8 +2,10 @@
 <head>
   <title><%= @cmd_set_def.app %></title>
   <link href="/stylesheets/resources/css/ext-all.css" rel="stylesheet" type="text/css"/>
+  <link href="/stylesheets/CheckHeader.css" rel="stylesheet" type="text/css"/>
   <script type="text/javascript" src="/javascripts/ext-all-debug.js"></script>
   <script type="text/javascript" src="/javascripts/ext-lang-zh_CN.js"></script>
+  <script type="text/javascript" src="/javascripts/CheckColumn.js"></script>
 </head>
 <body>
 <input type="hidden" id="app_id" value="<%= @cmd_set_def.app.id %>"/>
@@ -17,5 +19,6 @@
   <% end %>
 </select>
 <script type="text/javascript" src="/javascripts/edit_cmd_set.js"></script>
+
 </body>
 </html>
