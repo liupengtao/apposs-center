@@ -5,6 +5,7 @@
  * Time: 上午11:43
  * To change this template use File | Settings | File Templates.
  */
+Ext.QuickTips.init();
 Ext.onReady(function() {
     //请求获取命令组数据并解析
     var cmdGroupNodes = [];
@@ -45,7 +46,7 @@ Ext.onReady(function() {
                 folderSort: true,
                 sorters: [
                     {
-                        property: 'text',
+                        property: 'id',
                         direction: 'ASC'
                     }
                 ]
@@ -60,29 +61,54 @@ Ext.onReady(function() {
                 viewConfig: {
                     plugins: {
                         ptype: 'treeviewdragdrop',
-                        allowParentInserts:true
+                        enableDrop:false
                     }
                 },
                 listeners:{
-                    beforeremove:function() {
-                var n = e.dropNode; // the node that was dropped
-                var copy = new xt.TreeNode( // copy it
-                  Ext.apply({}, n.attributes)
-                );
-                e.dropNode = copy; // assign the copy as the new dropNode
+                    beforeitemremove:function(parent, node) {
+                        var nextSibling = node.nextSibling;
+                        var newNode = node.copy(node.id);
+                        if (nextSibling) {
+                            parent.insertBefore(newNode, nextSibling);
+                        } else {
+                            parent.appendChild(newNode);
+                        }
                     }
                 }
             });
-            cmdGroupTreePanel.on("itemremove", function(parent,node){
-                var new_node = node.copy(node.id+"_clone");
-                parent.appendChild(new_node);
-            });
-            for (var p in cmdGroupTreePanel.dragZone) {
-                alert(p + ':' + cmdGroupTreePanel.dragZone[p])
-            }
 
             function $(id) {
                 return document.getElementById(id);
+            }
+
+            //增加命令到命令集
+            function updateCmdSet(node) {
+                if (node) {
+                    node.data.allowFailure = false;
+                }
+                var expression = '';
+                //获取命令集表达式
+                cmdSetTreePanel.getRootNode().eachChild(function(child) {
+                    var data = child.data;
+                    expression += data.id.substring(data.id.length - 1, data.id.length) + (data.allowFailure == true ? '|true' : '');
+                    if (!child.isLast()) {
+                        expression += ',';
+                    }
+                });
+//                alert(expression)
+                //更新命令集
+//                Ext.Ajax.request({
+//                    url:'/apps/' + appId + '/cmd_set_defs/' + cmdSetDefId,
+//                    method:'PUT',
+//                    params:{
+//                        name:Ext.getCmp('cmdSetName').value,
+//                        expression:expression
+//                    },
+//                    callback:function(options, success, response) {
+//                        alert(success);
+//                        alert(response.responseText)
+//                    }
+//                });
             }
 
             //获取命令包的相关信息
@@ -96,7 +122,13 @@ Ext.onReady(function() {
             for (var i = 0, len = cmdSetDefExpression.length; i < len; i++) {
                 var option = cmdSetDefExpression[i];
                 var cmdDef = {};
-                cmdDef.id = option.value;
+                var id = option.value.split('|');
+                if (id.length > 1 && id[1] == 'true') {
+                    cmdDef.allowFailure = true;
+                } else {
+                    cmdDef.allowFailure = false;
+                }
+                cmdDef.id = id[0];
                 cmdDef.text = option.text;
                 cmdDef.leaf = true
                 cmdDefList[cmdDefList.length] = cmdDef;
@@ -108,34 +140,90 @@ Ext.onReady(function() {
                     expanded: true,
                     children:cmdDefList
                 },
-                folderSort: true,
-                sorters: [
-                    {
-                        property: 'text',
-                        direction: 'ASC'
-                    }
-                ]
+                fields:['id','text','allowFailure']
             });
 
             //命令包树
             var cmdSetTreePanel = Ext.create('Ext.tree.Panel', {
-                title:'命令包',
-                region:'center',
+                title:'命令包所有命令',
                 collapsible:true,
+                rootVisible:false,
                 viewConfig: {
                     plugins: {
-                        ptype: 'treeviewdragdrop',
-                        allowParentInserts:true
+                        ptype: 'treeviewdragdrop'
                     }
                 },
                 store:cmdSetTreeStore,
                 listeners:{
                     itemclick:function(view, record, item, index, e) {
-                        var root = cmdSetTreePanel.getRootNode();
-                        alert(root.firstChild.isFirst)
-                        alert(root.findChild('id',[1]).raw.text)
                     }
-                }
+                },
+                columns: [
+                    {
+                        xtype:'treecolumn',
+                        text: '命令',
+                        dataIndex: 'text'
+                    },
+                    {
+                        xtype:'checkcolumn',
+                        text: '允许失败',
+                        dataIndex: 'allowFailure',
+                        listeners:{
+                            checkchange:function(column,number,checked) {
+                                var view = cmdSetTreePanel.getView();
+                                alert(view.getRecord(view.getNode(number)).raw.text)
+                            }
+                        }
+                    },
+                    {
+                        xtype: 'actioncolumn',
+                        width: 20,
+                        items: [
+                            {
+                                icon   : '/images/delete.gif',
+                                tooltip: 'Sell stock',
+                                handler: function(grid, rowIndex, colIndex) {
+                                }
+                            }
+                        ]
+                    }
+                ]
+            });
+
+            //显示命令包树的信息
+            var cmdSetPanel = Ext.create('Ext.panel.Panel', {
+                title:'命令包',
+                region:'center',
+                collapsible:true,
+                layout:'border',
+                items:[
+                    {
+                        layout:'anchor',
+                        frame:true,
+                        region:'north',
+                        items:[
+                            {
+                                xtype:'textfield',
+                                fieldLabel:'命令包名',
+                                id:'cmdSetName',
+                                value:cmdSetDefName,
+                                anchor:'50%',
+                                enableKeyEvents:true,
+                                listeners:{
+                                    keyup:function(text, e) {
+                                        if (e.getKey() == Ext.EventObject.ENTER) {
+                                            updateCmdSet();
+                                        }
+                                    },
+                                    blur:function() {
+                                        updateCmdSet();
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    cmdSetTreePanel
+                ]
             });
 
             var editCmdSetMainViewport = Ext.create('Ext.Viewport', {
@@ -149,7 +237,7 @@ Ext.onReady(function() {
                 },
                 items: [
                     cmdGroupTreePanel,
-                    cmdSetTreePanel
+                    cmdSetPanel
                 ]
             });
         }

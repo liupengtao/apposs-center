@@ -25,7 +25,9 @@ class CmdSetDefsController < BaseController
   end
   
   def update
-    obj = current_app.cmd_set_defs.find(params[:id]).update_attributes :name => params[:name], :expression => params[:expression]
+    obj = current_app.cmd_set_defs.find(params[:id])
+    p obj
+    obj.update_attributes :name => params[:name], :expression => params[:expression]
     respond_with obj
   end
   
