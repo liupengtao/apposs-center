@@ -22,7 +22,7 @@ app.machines << Machine.create(:name => 'tanx1.cnz',:host => 'localhost')
 app.machines << Machine.create(:name => 'tanx2.cnz',:host => 'test')
 Machine.create(:name => 'tanx3.cnz',:host => 'test')
 
-app.cmd_set_defs << CmdSetDef.create(:name => "upgrade package", :expression => '1,2,4')
+app.cmd_set_defs << CmdSetDef.create(:name => "upgrade package", :expression => '1,2|true,4')
 
 
 admin_role = Role.create(:name => 'Admin')

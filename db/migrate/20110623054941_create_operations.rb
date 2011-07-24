@@ -3,6 +3,7 @@ class CreateOperations < ActiveRecord::Migration
     create_table :operations do |t|
       t.integer :command_id
       t.integer :machine_id
+      t.boolean :next_when_fail
       t.integer :status, :default => 0
       t.boolean :isok, :default => false
       t.text :response

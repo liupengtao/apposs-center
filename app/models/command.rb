@@ -19,7 +19,8 @@ class Command < ActiveRecord::Base
       	:room_id => m.room_id,
       	:machine_host => m.host,
       	:command_name => command_name,
-      	:room_name => room_map[m.room_id]
+      	:room_name => room_map[m.room_id],
+      	:next_when_fail => next_when_fail
       )
     }
   end

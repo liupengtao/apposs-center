@@ -23,7 +23,8 @@ class CmdSetDef < ActiveRecord::Base
       Command.create(
           :name => cmd_def.name,
           :cmd_def_id => cmd_def_id,
-          :cmd_set_id => cmd_set_id
+          :cmd_set_id => cmd_set_id,
+          :next_when_fail => next_when_fail
       )
     }
   end
