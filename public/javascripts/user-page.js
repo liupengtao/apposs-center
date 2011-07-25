@@ -59,7 +59,7 @@ Ext.onReady(function() {
                     frame:true
                 }
             ]
-        }
+        };
 
         //操作数据store的获取
         var operationStore = Ext.create('Ext.data.Store', {
@@ -106,6 +106,250 @@ Ext.onReady(function() {
         appPanels[appPanels.length] = appPanel;
     }
 
+    //增加命令集
+    function addCmdSet(appId) {
+        //请求获取命令组数据并解析
+        var cmdGroupNodes = [];
+        Ext.Ajax.request({
+            url:'/cmd_groups',
+            callback:function(options, success, response) {
+                var cmdGroups = Ext.decode(response.responseText);
+                for (var i = 0; i < cmdGroups.length; i++) {
+                    var cmdGroupNode = {};
+                    var cmdGroup = cmdGroups[i];
+                    cmdGroupNode.id = 'cmd_group' + cmdGroup.cmd_group.id;
+                    cmdGroupNode.text = cmdGroup.cmd_group.name;
+
+                    //为命令组增加命令
+                    var cmdDefs = cmdGroup.cmd_group.cmd_defs;
+                    if (cmdDefs.length == 0) {
+                        cmdGroupNode.leaf = true;
+                    } else {
+                        var children = [];
+                        for (var j = 0; j < cmdDefs.length; j++) {
+                            var cmdDef = {};
+                            cmdDef.id = 'cmd_def' + cmdDefs[j].id;
+                            cmdDef.text = cmdDefs[j].name;
+                            cmdDef.leaf = true;
+
+                            children[children.length] = cmdDef;
+                        }
+                        cmdGroupNode.children = children;
+                    }
+                    cmdGroupNodes[cmdGroupNodes.length] = cmdGroupNode;
+                }
+                var cmdGroupStore = Ext.create('Ext.data.TreeStore', {
+                    root: {
+                        text: '命令组列表',
+                        expanded: true,
+                        children:cmdGroupNodes
+                    },
+                    folderSort: true,
+                    sorters: [
+                        {
+                            property: 'id',
+                            direction: 'ASC'
+                        }
+                    ]
+                });
+
+                //系统所有的命令组树
+                var cmdGroupTreePanel = Ext.create('Ext.tree.Panel', {
+                    title: '当前系统所有命令',
+                    region:'west',
+                    store:cmdGroupStore,
+                    width:200,
+                    autoScroll:true,
+                    collapsible:true,
+                    viewConfig: {
+                        plugins: {
+                            ptype: 'treeviewdragdrop',
+                            enableDrop:false
+                        }
+                    },
+                    listeners:{
+                        beforeitemremove:function(parent, node) {
+                            var nextSibling = node.nextSibling;
+                            var newNode = node.copy(node.id);
+                            if (node.isLeaf() == false) {
+                                node.eachChild(function(child) {
+                                    newNode.appendChild(child.copy(child.id));
+                                });
+                            }
+                            if (nextSibling) {
+                                parent.insertBefore(newNode, nextSibling);
+                            } else {
+                                parent.appendChild(newNode);
+                            }
+                        }
+                    }
+                });
+
+                //增加命令到命令集
+                function addCmdSet() {
+                    var expression = '';
+                    //获取命令集表达式
+                    cmdSetTreePanel.getRootNode().eachChild(function(child) {
+                        var data = child.data;
+                        expression += data.id.substring(data.id.length - 1, data.id.length) + (data.allowFailure == true ? '|true' : '');
+                        if (!child.isLast()) {
+                            expression += ',';
+                        }
+                    });
+                    alert(expression)
+                    //更新命令集
+                    Ext.Ajax.request({
+                        url:'/apps/' + appId + '/cmd_set_defs',
+                        method:'POST',
+                        params:{
+                            name:Ext.getCmp('cmdSetName').value,
+                            expression:expression
+                        },
+                        callback:function(options, success, response) {
+                            alert(success);
+                            alert(response.responseText)
+                        }
+                    });
+                }
+
+                var cmdSetTreeStore = Ext.create('Ext.data.TreeStore', {
+                    root: {
+                        text: '',
+                        expanded: true
+                    },
+                    fields:['id','text','allowFailure']
+                });
+
+                //命令包树
+                var cmdSetTreePanel = Ext.create('Ext.tree.Panel', {
+                    title:'命令包所有命令',
+                    collapsible:true,
+                    region:'center',
+//                    rootVisible:false,
+                    viewConfig: {
+                        plugins: {
+                            ptype: 'treeviewdragdrop'
+                        }
+                    },
+                    autoScroll:true,
+                    listeners:{
+                        //向命令包中增加命令
+                        beforeiteminsert:function(parent, node, refNode) {
+                            if (node.isLeaf() == true) {
+                                parent.remove(node);
+                            }
+                        },
+                        itemappend:function(parent, node, index) {
+                        }
+                    },
+                    tbar: [
+                        {
+                            xtype: 'button',
+                            iconCls:'add',
+                            text: '保存',
+                            handler:function() {
+                                var name = Ext.getCmp('cmdSetName').value;
+                                if (!name || name.length == 9) {
+                                    Ext.Msg.alert('提醒', '请输入命令集的名字！');
+                                    return;
+                                }
+                                cmdSetTreePanel.getRootNode().commit();
+//                                addCmdSet();
+                                Ext.getCmp('savedStatus').setText('命令集增加成功');
+                                this.setDisabled(true);
+                            }
+                        }
+                    ],
+                    store:cmdSetTreeStore,
+                    columns: [
+                        {
+                            xtype:'treecolumn',
+                            text: '命令',
+                            width:220,
+                            dataIndex: 'text'
+                        },
+                        {
+                            xtype:'checkcolumn',
+                            text: '允许失败',
+                            dataIndex: 'allowFailure'
+                        },
+                        {
+                            xtype: 'actioncolumn',
+                            width: 20,
+                            items: [
+                                {
+                                    icon   : '/images/delete.gif',
+                                    tooltip: '删除当前命令',
+                                    handler: function(tree, rowIndex, colIndex) {
+                                        var root = this.up('treepanel').getRootNode();
+                                        if (rowIndex == 0) {
+                                            root.removeAll();
+                                        } else {
+                                            var nodeToDeleted = root.getChildAt(rowIndex - 1);
+                                            nodeToDeleted.remove();
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                });
+
+                //显示命令包树的信息
+                var cmdSetPanel = Ext.create('Ext.panel.Panel', {
+                    title:'命令包',
+                    region:'center',
+                    collapsible:true,
+                    layout:'border',
+                    items:[
+                        {
+                            layout:'column',
+                            frame:true,
+                            region:'north',
+                            items:[
+                                {
+                                    xtype:'textfield',
+                                    fieldLabel:'命令包名',
+                                    id:'cmdSetName',
+                                    columnWidth:0.5,
+                                    enableKeyEvents:true,
+                                    listeners:{
+                                        keyup:function(field) {
+                                            cmdSetTreePanel.getRootNode().set('text', field.getValue());
+                                        }
+                                    }
+                                },
+                                {
+                                    xtype:'label',
+                                    columnWidth:0.5,
+                                    id:'savedStatus'
+                                }
+                            ]
+                        },
+                        cmdSetTreePanel
+                    ]
+                });
+                var addCmdSetWin = Ext.create('Ext.Window', {
+                    title:'增加命令集',
+                    layout: {
+                        type: 'border',
+                        padding: 5
+                    },
+                    defaults: {
+                        split: true
+                    },
+                    items: [
+                        cmdGroupTreePanel,
+                        cmdSetPanel
+                    ],
+                    width:700,
+                    height:500
+                });
+                addCmdSetWin.show();
+            }
+        });
+    }
+
     //构造iframe标签
     function getIFrameForEditCmdSet(url, width, height) {
         return '<iframe src="' + url + ' " width="' + width + '" height="' + height + '"' +
@@ -127,7 +371,7 @@ Ext.onReady(function() {
                 //此处获取App的机器列表，url为apps/:id/machines
                 (function(id) {
                     Ext.Ajax.request({
-                        url:'/apps/' + (id + 1) + '/machines',
+                        url:'/apps/' + id + '/machines',
                         callback:function(options, success, response) {
                             var machinesStr = response.responseText;
                             var machines = Ext.decode(machinesStr);
@@ -139,14 +383,14 @@ Ext.onReady(function() {
                                     columnWidth:1
                                 }
                             }
-                            Ext.getCmp('machines' + (id + 1)).add(machinesListLabel);
+                            Ext.getCmp('machines' + id).add(machinesListLabel);
                         }
                     });
-                })(i);
+                })(obj[i].app.id);
                 //此处获取App的命令集列表，url为apps/:id/cmd_set_defs
                 (function(id) {
                     Ext.Ajax.request({
-                        url:'/apps/' + (id + 1) + '/cmd_set_defs',
+                        url:'/apps/' + id + '/cmd_set_defs',
                         callback:function(options, success, response) {
                             var cmdSetStr = response.responseText;
                             var cmdSet = Ext.decode(cmdSetStr);
@@ -180,13 +424,13 @@ Ext.onReady(function() {
                                                                 } else if (type == 'multi') {
                                                                     var respondUrl = Ext.decode(response.responseText).url;
                                                                     var multiWin = Ext.create('Ext.Window', {
-                                                                        width:window.innerWidth - 300,
-                                                                        height:window.innerHeight - 300,
+                                                                        width:720,
+                                                                        height:544,
                                                                         autoScroll:true,
                                                                         items:[
                                                                             {
                                                                                 autoScroll:true,
-                                                                                html:getIFrameForEditCmdSet(respondUrl, window.innerWidth - 300, window.innerHeight - 300)
+                                                                                html:getIFrameForEditCmdSet(respondUrl, 700, 500)
                                                                             }
                                                                         ]
                                                                     });
@@ -210,10 +454,34 @@ Ext.onReady(function() {
                                     ]
                                 }
                             }
-                            Ext.getCmp('commands' + (id + 1)).add(cmdSetPanel);
+                            //增加命令集面板
+                            cmdSetPanel[cmdSetPanel.length] = {
+                                xtype:'panel',
+                                layout:'column',
+                                border:false,
+                                anchor:'100%',
+                                frame:true,
+                                items:[
+                                    {
+                                        xtype:'label',
+                                        columnWidth:0.5,
+                                        html:'&nbsp;'
+                                    },
+                                    {
+                                        xtype:'button',
+                                        text:'增加',
+                                        id:'appAddButton' + id,
+                                        columnWidth:0.5,
+                                        handler:function() {
+                                            addCmdSet(this.id.substring(this.id.length - 1));
+                                        }
+                                    }
+                                ]
+                            }
+                            Ext.getCmp('commands' + id).add(cmdSetPanel);
                         }
                     });
-                })(i);
+                })(obj[i].app.id);
             }
         }
     });

@@ -9,3 +9,7 @@
 ul#welcome_info {
     float: right;
 }
+
+.add {
+    background: url("/images/add.png");
+}

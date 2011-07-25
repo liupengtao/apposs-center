@@ -58,6 +58,8 @@ Ext.onReady(function() {
                 region:'west',
                 store:cmdGroupStore,
                 collapsible:true,
+                width:200,
+                autoScroll:true,
                 viewConfig: {
                     plugins: {
                         ptype: 'treeviewdragdrop',
@@ -84,7 +86,9 @@ Ext.onReady(function() {
             //增加命令到命令集
             function updateCmdSet(node) {
                 if (node) {
-                    node.data.allowFailure = false;
+                    if (node.data.allowFailure !== true) {
+                        node.data.allowFailure = false;
+                    }
                 }
                 var expression = '';
                 //获取命令集表达式
@@ -149,6 +153,7 @@ Ext.onReady(function() {
                 collapsible:true,
                 region:'center',
                 rootVisible:false,
+                autoScroll:true,
                 viewConfig: {
                     plugins: {
                         ptype: 'treeviewdragdrop'
@@ -162,16 +167,13 @@ Ext.onReady(function() {
                     },
                     itemappend:function(parent, node, index) {
                         updateCmdSet(node);
-                    },
-                    itemmove:function(node) {
-                        alert(node.data.allowFailure)
-                        updateCmdSet();
                     }
                 },
                 columns: [
                     {
                         xtype:'treecolumn',
                         text: '命令',
+                        width:220,
                         dataIndex: 'text'
                     },
                     {
