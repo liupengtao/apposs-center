@@ -5,7 +5,6 @@
   <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
   <%= stylesheet_link_tag :all %>
   <%= stylesheet_link_tag "resources/css/ext-all.css" %>
-  <%= javascript_include_tag :defaults %>
   <%= javascript_include_tag "ext-all-debug.js" %>
   <%= javascript_include_tag "ext-lang-zh_CN.js" %>
   <%= javascript_include_tag "user-page.js" %>
@@ -16,11 +15,7 @@
 <div id="north">
   <span id="notice"><%= flash[:notice] %></span>
   <ul id="welcome_info">
-    <% if current_user.nil? %>
-        <li>您好，请点击<%= link_to "这里", '/users/sign_in' %>登录系统</li>
-    <% else %>
-        <li><%= current_user.email %>，欢迎使用淘宝运维系统！<%= link_to "退出", '/users/sign_out' %></li>
-    <% end %>
+    <li><%= current_user.email %>，欢迎使用淘宝运维系统！<%= link_to "退出", '/users/sign_out' %></li>
   </ul>
 </div>
 <%= yield %>

@@ -1,4 +1,4 @@
-/* Style for application.html.erb */
+/* Style for application.html.erb and admin.html.erb*/
 #notice {
     margin-left: 500px;
     display: block;
@@ -7,9 +7,25 @@
 }
 
 ul#welcome_info {
+    list-style: none;
     float: right;
 }
 
 .add {
     background: url("/images/add.png");
+}
+
+.admin_nav_menu table {
+    margin-top: -20px;
+}
+
+.admin_nav_menu table tbody tr {
+    height: 60px;
+    line-height: 60px;
+    vertical-align: middle;
+}
+
+.admin_nav_menu table tbody tr td div {
+    font-size: 20px;
+    font-weight: bolder;
 }
