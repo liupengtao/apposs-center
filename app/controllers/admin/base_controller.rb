@@ -1,3 +1,3 @@
-class Admin::BaseController < InheritedResources::Base
+class Admin::BaseController < ApplicationController
   layout 'admin'
 end

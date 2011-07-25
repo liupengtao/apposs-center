@@ -54,7 +54,7 @@ Apposs::Application.routes.draw do
     #   end
 
   namespace :admin do
-    root :to => 'apps#index'
+    root :to => 'home#index'
     resources :apps
     resources :users
     resources :roles

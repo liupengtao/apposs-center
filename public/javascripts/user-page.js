@@ -153,7 +153,10 @@ Ext.onReady(function() {
                     ]
                 });
 
+                //删除命令组的下一个兄弟结点
+                var cmdGgoupTreePanelNextSibling = null;
                 //系统所有的命令组树
+
                 var cmdGroupTreePanel = Ext.create('Ext.tree.Panel', {
                     title: '当前系统所有命令',
                     region:'west',
@@ -168,19 +171,32 @@ Ext.onReady(function() {
                         }
                     },
                     listeners:{
-                        beforeitemremove:function(parent, node) {
+                        itemremove:function(parent, node) {
                             var nextSibling = node.nextSibling;
-                            var newNode = node.copy(node.id);
-                            if (node.isLeaf() == false) {
-                                node.eachChild(function(child) {
-                                    newNode.appendChild(child.copy(child.id));
-                                });
+                            var newNode = node.createNode({
+                                id:node.data.id,
+                                text:node.data.text,
+                                leaf:node.data.leaf
+                            });
+                            if (!node.isLeaf()) {
+                                var childNodes = node.childNodes;
+                                for (var i = 0,len = childNodes.length; i < len; i++) {
+                                    newNode.appendChild({
+                                        id:childNodes[i].data.id,
+                                        text:childNodes[i].data.text,
+                                        leaf:childNodes[i].data.leaf
+                                    });
+                                }
                             }
                             if (nextSibling) {
                                 parent.insertBefore(newNode, nextSibling);
                             } else {
                                 parent.appendChild(newNode);
                             }
+                            if (node.isExpanded()) {
+                                newNode.expand();
+                            }
+                            node.remove(true);
                         }
                     }
                 });
@@ -220,6 +236,24 @@ Ext.onReady(function() {
                     fields:['id','text','allowFailure']
                 });
 
+                //向命令包中增加命令组
+                function addCmdGroupToCmdSet(parent, node, refNode) {
+                    node.eachChild(function(child) {
+                        var newChild = parent.createNode({
+                            id:child.data.id,
+                            text:child.data.text,
+                            leaf:child.data.leaf
+                        });
+                        setTimeout(function() {
+                            parent.insertBefore(newChild, refNode);
+                        }, 10);
+                    });
+                    setTimeout(function() {
+                        node.removeAll();
+                        node.remove();
+                    }, 10);
+                }
+
                 //命令包树
                 var cmdSetTreePanel = Ext.create('Ext.tree.Panel', {
                     title:'命令包所有命令',
@@ -234,12 +268,15 @@ Ext.onReady(function() {
                     autoScroll:true,
                     listeners:{
                         //向命令包中增加命令
-                        beforeiteminsert:function(parent, node, refNode) {
-                            if (node.isLeaf() == true) {
-                                parent.remove(node);
+                        iteminsert:function(parent, node, refNode) {
+                            if (!node.isLeaf()) {
+                                addCmdGroupToCmdSet(parent, node, refNode);
                             }
                         },
                         itemappend:function(parent, node, index) {
+                            if (!node.isLeaf()) {
+                                addCmdGroupToCmdSet(parent, node);
+                            }
                         }
                     },
                     tbar: [
@@ -249,7 +286,7 @@ Ext.onReady(function() {
                             text: '保存',
                             handler:function() {
                                 var name = Ext.getCmp('cmdSetName').value;
-                                if (!name || name.length == 9) {
+                                if (!name || name.trim().length == 0) {
                                     Ext.Msg.alert('提醒', '请输入命令集的名字！');
                                     return;
                                 }
