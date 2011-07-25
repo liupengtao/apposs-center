@@ -4,10 +4,13 @@ class Command < ActiveRecord::Base
   has_many :options
   has_many :operations
 
-  def after_create
+  after_create :build_operations
+  
+  def build_operations
     # 为循环缓存变量
-  	machines = cmd_set.app.machines.select([:id,:host,:room_id]).all
-    command_name = cmd_set.name
+    cmd_set_def = cmd_set.cmd_set_def
+  	machines = cmd_set_def.app.machines.select([:id,:host,:room_id]).all
+    command_name = cmd_def.name
   	room_map = Room.
         where(:id => machines.collect{|m| m.room_id }.uniq).
         inject({}){|map,room| map.update(room.id => room.name)}

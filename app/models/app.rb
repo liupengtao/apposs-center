@@ -6,9 +6,6 @@ class App < ActiveRecord::Base
   # Machine
   has_many :machines
 
-  # Command
-  has_many :commands
-  
   has_many :cmd_set_defs
   
   def to_s
