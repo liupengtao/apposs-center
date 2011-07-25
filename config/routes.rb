@@ -53,12 +53,13 @@ Apposs::Application.routes.draw do
     #     resources :products
     #   end
 
-  namespace :admin do
+  namespace :admin, :module => "admin" do
     root :to => 'home#index'
+    resources :cmd_defs
+    resources :cmd_groups
     resources :apps
     resources :users
     resources :roles
-    resources :cmd_groups
   end
 
   resources :cmd_groups
