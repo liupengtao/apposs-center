@@ -10,7 +10,7 @@ class CmdGroup < ActiveRecord::Base
   
   def update_cmd_defs
     self.cmd_defs.clear
-    self.cmd_defs << CmdDef.where(:id => cmd_def_ids.split( ',' ))
+    self.cmd_defs << CmdDef.where(:id => cmd_def_ids.split( ',' )) if cmd_def_ids
   end
   
   def to_s
