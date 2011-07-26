@@ -8,12 +8,10 @@ class App < ActiveRecord::Base
 
   has_many :cmd_set_defs
   
+  has_many :cmd_sets
+  
   def to_s
   	send :name
-  end
-
-  def cmd_sets
-    CmdSet.where(:cmd_set_def_id => cmd_set_defs.select(:id).collect{|o| o.id})
   end
 
 end

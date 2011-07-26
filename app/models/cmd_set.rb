@@ -4,5 +4,7 @@ class CmdSet < ActiveRecord::Base
   has_many :commands
 
   belongs_to :operator, :class_name => 'User'
-
+  
+  belongs_to :app
+  
 end

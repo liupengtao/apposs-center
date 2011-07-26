@@ -3,14 +3,15 @@ class Command < ActiveRecord::Base
   belongs_to :cmd_def
   has_many :options
   has_many :operations
-
-  after_create :build_operations
   
-  def build_operations
+  before_create do |command|
+    self.name = cmd_def.name
+  end
+
+  def build_operations!
     # 为循环缓存变量
     cmd_set_def = cmd_set.cmd_set_def
   	machines = cmd_set_def.app.machines.select([:id,:host,:room_id]).all
-    command_name = cmd_def.name
   	room_map = Room.
         where(:id => machines.collect{|m| m.room_id }.uniq).
         inject({}){|map,room| map.update(room.id => room.name)}
@@ -21,10 +22,16 @@ class Command < ActiveRecord::Base
       	:command_id => self.id,
       	:room_id => m.room_id,
       	:machine_host => m.host,
-      	:command_name => command_name,
+      	:command_name => name,
       	:room_name => room_map[m.room_id],
       	:next_when_fail => next_when_fail
       )
     }
+    self
+  end
+  
+  alias_method :old_to_json, :to_json
+  def to_json
+    
   end
 end

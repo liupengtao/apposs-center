@@ -3,6 +3,9 @@ class CreateCmdSets < ActiveRecord::Migration
     create_table :cmd_sets do |t|
       t.integer :cmd_set_def_id
       t.integer :operator_id
+      t.integer :app_id
+      t.string :name
+      t.integer :status
 
       t.timestamps
     end
