@@ -1,0 +1,13 @@
+machine1:
+  id: 1
+  app_id: 1
+  room_id: 1
+  name: tanx1.cnz
+  host: localhost
+machine2:
+  id: 2
+  app_id: 1
+  room_id: 1
+  name: tanx1.cnz
+  host: test
+

@@ -37,5 +37,5 @@ class Command < ActiveRecord::Base
     event :ack do transition :fail => :done end
     event :success do transition :running => :done end
   end
-
+  
 end

@@ -1,0 +1,20 @@
+cmd_def1:
+  id: 1
+  cmd_group_id: 1
+  name: echo start
+cmd_def2:
+  id: 2
+  cmd_group_id: 1
+  name: echo stop
+cmd_def3:
+  id: 3
+  cmd_group_id: 1
+  name: echo redeploy
+cmd_def4:
+  id: 4
+  cmd_group_id: 2
+  name: echo start_nodejs
+cmd_def5:
+  id: 5
+  cmd_group_id: 2
+  name: echo stop_nodejs

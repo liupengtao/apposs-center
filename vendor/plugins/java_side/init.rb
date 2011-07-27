@@ -1,4 +1,4 @@
-if RUBY_PLATFORM =~ /java/ and ENV["IGNORE_JAVA_SIDE"].nil?
+if false # RUBY_PLATFORM =~ /java/ and ENV["IGNORE_JAVA_SIDE"].nil?
   require 'java'
 
   Dir[Rails.root + "java/jars/*.jar"].each{|jar_file|

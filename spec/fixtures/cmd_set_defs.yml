@@ -1,0 +1,5 @@
+cmd_set_def1:
+  id: 1
+  app_id: 1
+  name: upgrade package
+  expression: 1,2|true,4
