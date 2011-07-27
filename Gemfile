@@ -48,3 +48,4 @@ gem "jdbc-sqlite3"
 gem "activerecord-jdbc-adapter"
 gem "jruby-openssl"
 gem "state_machine"
+gem "ruby-graphviz", :group => ["development"]

@@ -3,27 +3,26 @@ class Operation < ActiveRecord::Base
   belongs_to :command
   
   default_scope order("id")
-  
-  INIT = 0
-  DOWNLOADED = 1
-  RUNNING = 2
-  COMPLETED = 3
 
-  scope :inits, where(:status => INIT)
-  scope :downloads, where(:status => DOWNLOADED)
-  scope :runnings, where(:status => RUNNING)
-  scope :completes, where(:status => COMPLETED)
-  scope :uncompletes, where('status <> ?',COMPLETED)
-  
-  def download
-    update_attribute :status, DOWNLOADED
+  scope :inits, where(:state => :init)
+
+  def callback( isok, body)
+    self.isok = isok
+    self.response = body
+    deal
   end
 
-  def run
-    update_attribute :status, RUNNING
+  state_machine :state, :initial => :init do
+    event :download do transition :init => :ready end
+    event :invoke do transition :ready => :running end
+    event :deal do
+      transition :running => :done if :is_ok?
+      transition :running => :failure unless :is_ok?
+    end
+    event :ack do transition :failure => :done end
   end
 
-  def complete( isok, body)
-    update_attributes :status => COMPLETED, :isok => isok, :response => body
+  def is_ok?
+    self.isok
   end
 end

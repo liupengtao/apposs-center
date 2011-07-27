@@ -34,3 +34,5 @@ Stakeholder.create :user => u, :app => app, :role => pe_role
 %w{cnz cm3 cm4}.each{|name| Room.create(:name => name)}
 
 Room.first.machines << Machine.all
+
+# App.first.cmd_set_defs.first.create_cmd_set User.first

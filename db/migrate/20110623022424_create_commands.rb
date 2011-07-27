@@ -5,6 +5,7 @@ class CreateCommands < ActiveRecord::Migration
       t.integer :cmd_set_id
       t.boolean :next_when_fail
       t.string :name
+      t.string :state
       
       t.timestamps
     end

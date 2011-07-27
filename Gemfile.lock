@@ -137,6 +137,7 @@ GEM
       columnize (>= 0.1)
       ruby-debug-base (~> 0.10.4.0)
     ruby-debug-base (0.10.4-java)
+    ruby-graphviz (1.0.0)
     rubyzip (0.9.4)
     selenium-webdriver (0.2.2)
       childprocess (>= 0.1.9)
@@ -182,6 +183,7 @@ DEPENDENCIES
   rails (= 3.0.6)
   rspec-rails (= 2.6.0.rc6)
   ruby-debug
+  ruby-graphviz
   shoulda
   spork
   state_machine

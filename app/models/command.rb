@@ -30,8 +30,12 @@ class Command < ActiveRecord::Base
     self
   end
   
-  alias_method :old_to_json, :to_json
-  def to_json
-    
+  state_machine :state, :initial => :ready do
+    event :invoke do transition :ready => :running end
+    event :failure do transition :running => :fail end
+    event :acknowledge do transition :fail => :done end
+    event :ack do transition :fail => :done end
+    event :success do transition :running => :done end
   end
+
 end

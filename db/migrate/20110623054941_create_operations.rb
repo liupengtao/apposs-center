@@ -4,7 +4,7 @@ class CreateOperations < ActiveRecord::Migration
       t.integer :command_id
       t.integer :machine_id
       t.boolean :next_when_fail
-      t.integer :status, :default => 0
+      t.string :state
       t.boolean :isok, :default => false
       t.text :response
 
@@ -13,12 +13,12 @@ class CreateOperations < ActiveRecord::Migration
       t.string :room_name
       t.string :machine_host
       t.string :command_name
-      
+
       # 时间戳
       t.timestamps
     end
     add_index :operations, ["machine_id"], :name => "index_operations_on_machine_id"
-    add_index :operations, ["status"], :name => "index_operations_on_status"
+    add_index :operations, ["state"], :name => "index_operations_on_state"
   end
 
   def self.down

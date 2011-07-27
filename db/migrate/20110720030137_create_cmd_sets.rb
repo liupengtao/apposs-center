@@ -5,7 +5,7 @@ class CreateCmdSets < ActiveRecord::Migration
       t.integer :operator_id
       t.integer :app_id
       t.string :name
-      t.integer :status
+      t.string :state
 
       t.timestamps
     end
