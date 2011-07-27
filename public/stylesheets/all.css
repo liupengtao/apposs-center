@@ -16,7 +16,7 @@ ul#welcome_info {
 }
 
 .admin_nav_menu table {
-    margin-top: -20px;
+    margin-top: -55px;
 }
 
 .admin_nav_menu table tbody tr {
@@ -28,4 +28,8 @@ ul#welcome_info {
 .admin_nav_menu table tbody tr td div {
     font-size: 20px;
     font-weight: bolder;
+}
+
+.x-grid-row-selected {
+    color: blue;
 }

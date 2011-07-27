@@ -7,6 +7,7 @@
   <%= javascript_include_tag "ext-all.js" %>
   <%= javascript_include_tag "ext-lang-zh_CN.js" %>
   <%= javascript_include_tag "admin-page.js" %>
+  <%= javascript_include_tag "jquery.min.js" %>
   <%= csrf_meta_tag %>
   <style type="text/css">
       .x-grid-row-selected, .x-grid-row-over {
@@ -16,7 +17,7 @@
 </head>
 <body>
 <div id="north">
-  <span id="notice"><%= flash[:notice] %></span>
+  <span id="notice"><%= flash[:notice] %><h2>APPOSS管理系统</h2></span>
   <ul id="welcome_info">
     <li><%= current_user.email %>，你好，欢迎使用淘宝运维系统！<%= link_to "退出", '/users/sign_out' %></li>
   </ul>

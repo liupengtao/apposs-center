@@ -9,6 +9,7 @@ Ext.QuickTips.init();
 Ext.onReady(function() {
     //请求获取命令组数据并解析
     var cmdGroupNodes = [];
+    var csrf_token = $('meta[name="csrf-token"]').attr('content');
     Ext.Ajax.request({
         url:'/cmd_groups',
         callback:function(options, success, response) {
@@ -16,11 +17,11 @@ Ext.onReady(function() {
             for (var i = 0; i < cmdGroups.length; i++) {
                 var cmdGroupNode = {};
                 var cmdGroup = cmdGroups[i];
-                cmdGroupNode.id = 'cmd_group' + cmdGroup.cmd_group.id;
-                cmdGroupNode.text = cmdGroup.cmd_group.name;
+                cmdGroupNode.id = 'cmd_group' + cmdGroup.id;
+                cmdGroupNode.text = cmdGroup.name;
 
                 //为命令组增加命令
-                var cmdDefs = cmdGroup.cmd_group.cmd_defs;
+                var cmdDefs = cmdGroup.cmd_defs;
                 if (cmdDefs.length == 0) {
                     cmdGroupNode.leaf = true;
                 } else {
@@ -66,16 +67,52 @@ Ext.onReady(function() {
                         enableDrop:false
                     }
                 },
+                selModel:{
+                    mode:'MULTI'
+                },
                 listeners:{
-                    beforeitemremove:function(parent, node) {
+                    itemremove:function(parent, node) {
                         var nextSibling = node.nextSibling;
-                        var newNode = node.copy(node.id);
+                        var newNode = node.createNode({
+                            id:node.data.id,
+                            text:node.data.text,
+                            leaf:node.data.leaf
+                        });
+                        if (!node.isLeaf()) {
+                            var childNodes = node.childNodes;
+                            for (var i = 0,len = childNodes.length; i < len; i++) {
+                                newNode.appendChild({
+                                    id:childNodes[i].data.id,
+                                    text:childNodes[i].data.text,
+                                    leaf:childNodes[i].data.leaf
+                                });
+                            }
+                        }
                         if (nextSibling) {
                             parent.insertBefore(newNode, nextSibling);
                         } else {
                             parent.appendChild(newNode);
                         }
+                        if (node.isExpanded()) {
+                            newNode.expand();
+                        }
+                        node.remove(true);
                     }
+                }
+            });
+
+            cmdGroupTreePanel.getSelectionModel().on('select', function(selModel, record) {
+                var nodes = selModel.getSelection();
+                if (record.isLeaf() && nodes.indexOf(record.parentNode) > -1) {
+                    selModel.deselect(record);
+                }
+                if (!record.isLeaf() && !record.isRoot()) {
+                    record.eachChild(function(child) {
+                        selModel.deselect(child);
+                    });
+                }
+                if (record.isRoot()) {
+                    selModel.deselect(record);
                 }
             });
 
@@ -84,35 +121,57 @@ Ext.onReady(function() {
             }
 
             //增加命令到命令集
-            function updateCmdSet(node) {
+            function updateCmdSet(parent, node, refNode) {
                 if (node) {
-                    if (node.data.allowFailure !== true) {
+                    if (!node.isLeaf()) {
+                        node.eachChild(function(child) {
+                            var newChild = parent.createNode({
+                                _id:child.data.id,
+                                text:child.data.text,
+                                leaf:child.data.leaf,
+                                allowFailure:false
+                            });
+                            setTimeout(function() {
+                                parent.insertBefore(newChild, refNode);
+                            }, 10);
+                        });
+                        setTimeout(function() {
+                            node.removeAll();
+                            node.remove();
+                        }, 10);
+
+                    } else if (node.data.allowFailure !== true) {
+                        if (!node.data._id) {//当增加文件夹中的所有命令时需要注意的地方。
+                            node.data._id = node.data.id;
+                        }
                         node.data.allowFailure = false;
                     }
                 }
-                var expression = '';
-                //获取命令集表达式
-                cmdSetTreePanel.getRootNode().eachChild(function(child) {
-                    var data = child.data;
-                    expression += data.id.substring(data.id.length - 1, data.id.length) + (data.allowFailure == true ? '|true' : '');
-                    if (!child.isLast()) {
-                        expression += ',';
-                    }
-                });
+                setTimeout(function() {
+                    var expression = '';
+                    //获取命令集表达式
+                    cmdSetTreePanel.getRootNode().eachChild(function(child) {
+                        var id = child.get('_id');
+                        expression += id.substring(id.length - 1, id.length) + (child.get('allowFailure') == true ? '|true' : '');
+                        if (!child.isLast()) {
+                            expression += ',';
+                        }
+                    });
 //                alert(expression)
-                //更新命令集
-//                Ext.Ajax.request({
-//                    url:'/apps/' + appId + '/cmd_set_defs/' + cmdSetDefId,
-//                    method:'PUT',
-//                    params:{
-//                        name:Ext.getCmp('cmdSetName').value,
-//                        expression:expression
-//                    },
-//                    callback:function(options, success, response) {
-//                        alert(success);
-//                        alert(response.responseText)
-//                    }
-//                });
+                    //更新命令集
+
+                    Ext.Ajax.request({
+                        url:'/apps/' + appId + '/cmd_set_defs/' + cmdSetDefId,
+                        method:'PUT',
+                        params:{
+                            authenticity_token:csrf_token,
+                            'cmd_set_def[name]':Ext.getCmp('cmdSetName').value,
+                            'cmd_set_def[expression]':expression
+                        },
+                        callback:function(options, success, response) {
+                        }
+                    });
+                }, 500);
             }
 
             //获取命令包的相关信息
@@ -132,7 +191,7 @@ Ext.onReady(function() {
                 } else {
                     cmdDef.allowFailure = false;
                 }
-                cmdDef.id = id[0];
+                cmdDef._id = id[0];
                 cmdDef.text = option.text;
                 cmdDef.leaf = true
                 cmdDefList[cmdDefList.length] = cmdDef;
@@ -144,7 +203,7 @@ Ext.onReady(function() {
                     expanded: true,
                     children:cmdDefList
                 },
-                fields:['id','text','allowFailure']
+                fields:['_id','text','allowFailure']
             });
 
             //命令包树
@@ -152,7 +211,7 @@ Ext.onReady(function() {
                 title:'命令包所有命令',
                 collapsible:true,
                 region:'center',
-                rootVisible:false,
+//                rootVisible:false,
                 autoScroll:true,
                 viewConfig: {
                     plugins: {
@@ -163,10 +222,10 @@ Ext.onReady(function() {
                 listeners:{
                     //向命令包中增加命令
                     iteminsert:function(parent, node, refNode) {
-                        updateCmdSet(node);
+                        updateCmdSet(parent, node, refNode);
                     },
                     itemappend:function(parent, node, index) {
-                        updateCmdSet(node);
+                        updateCmdSet(parent, node);
                     }
                 },
                 columns: [
@@ -182,6 +241,22 @@ Ext.onReady(function() {
                         dataIndex: 'allowFailure',
                         listeners:{
                             checkchange:function(column, number, checked) {
+//                                updateCmdSet();
+                                var root = this.up('treepanel').getRootNode();
+                                var node = root.getChildAt(number - 1);
+                                if (number == 0) {
+                                    root.eachChild(function(child) {
+                                        if (checked) {
+                                            child.set('allowFailure', true);
+                                        }
+                                        else {
+                                            child.set('allowFailure', false);
+                                        }
+                                        child.commit();
+                                    });
+                                    node = root;
+                                }
+                                node.commit();
                                 updateCmdSet();
                             }
                         }
@@ -195,8 +270,13 @@ Ext.onReady(function() {
                                 tooltip: '删除当前命令',
                                 handler: function(tree, rowIndex, colIndex) {
                                     var root = this.up('treepanel').getRootNode();
-                                    var nodeToDeleted = root.getChildAt(rowIndex);
-                                    nodeToDeleted.remove();
+                                    if (rowIndex == 0) {
+                                        root.removeAll();
+                                    } else {
+                                        var nodeToDeleted = root.getChildAt(rowIndex - 1);
+                                        nodeToDeleted.remove();
+                                    }
+
                                     updateCmdSet();
                                 }
                             }

@@ -8,7 +8,7 @@
 Ext.onReady(function() {
     //Application Panel array
     var appPanels = [];
-
+    var csrf_token = $('meta[name="csrf-token"]').attr('content');
     //Current User Application TabPanel
     var appTabPanel = Ext.create('Ext.tab.Panel', {
         region: 'center',
@@ -106,8 +106,105 @@ Ext.onReady(function() {
         appPanels[appPanels.length] = appPanel;
     }
 
+    //为应用加载命令集
+    function loadCmdSetForApp(appId) {
+        Ext.Ajax.request({
+            url:'/apps/' + appId + '/cmd_set_defs',
+            callback:function(options, success, response) {
+                var cmdSetStr = response.responseText;
+                var cmdSet = Ext.decode(cmdSetStr);
+                var cmdSetPanel = [];
+                for (var j = 0,len = cmdSet.length; j < len; j++) {
+                    var columnCount = cmdSet[j].actions.length + 1;
+                    var cmdSetPanelCmps = [];
+                    cmdSetPanelCmps[cmdSetPanelCmps.length] = {
+                        xtype:'label',
+                        columnWidth:1 / columnCount,
+                        html:cmdSet[j].name
+                    };
+                    for (var k = 1; k < columnCount; k++) {
+                        cmdSetPanelCmps[cmdSetPanelCmps.length] = {
+                            columnWidth:1 / columnCount,
+                            xtype:'button',
+                            text:cmdSet[j].actions[k - 1].name,
+                            handler:
+                                (function(url, method, type) {
+                                    return function() {
+                                        Ext.Ajax.request({
+                                            url:url,
+                                            method:method,
+//                                                        params:{
+//                                                            cmd_set_def_id:cmdSetId
+//                                                        },
+                                            callback:(function(type) {
+                                                return function(options, success, response) {
+                                                    if (type == 'simple') {
+                                                        Ext.Msg.alert('消息', response.responseText);
+                                                    } else if (type == 'multi') {
+                                                        var respondUrl = Ext.decode(response.responseText).url;
+                                                        var multiWin = Ext.create('Ext.Window', {
+                                                            width:720,
+                                                            height:544,
+                                                            autoScroll:true,
+                                                            items:[
+                                                                {
+                                                                    autoScroll:true,
+                                                                    html:getIFrameForEditCmdSet(respondUrl, 700, 500)
+                                                                }
+                                                            ]
+                                                        });
+                                                        multiWin.show();
+                                                    }
+                                                }
+                                            })(type)
+                                        })
+                                    }
+                                })(cmdSet[j].actions[k - 1].url, cmdSet[j].actions[k - 1].method, cmdSet[j].actions[k - 1].type)
+                        }
+                    }
+                    cmdSetPanel[cmdSetPanel.length] = {
+                        xtype:'panel',
+                        border:false,
+                        layout:'column',
+                        anchor:'100%',
+                        frame:true,
+                        items: [
+                            cmdSetPanelCmps
+                        ]
+                    }
+                }
+                //增加命令集面板
+                cmdSetPanel[cmdSetPanel.length] = {
+                    xtype:'panel',
+                    layout:'column',
+                    border:false,
+                    anchor:'100%',
+                    frame:true,
+                    items:[
+                        {
+                            xtype:'label',
+                            columnWidth:0.5,
+                            html:'&nbsp;'
+                        },
+                        {
+                            xtype:'button',
+                            text:'增加',
+                            id:'appAddButton' + appId,
+                            columnWidth:0.5,
+                            handler:function() {
+                                addCmdSetWindow(this.id.substring(this.id.length - 1));
+                            }
+                        }
+                    ]
+                }
+                Ext.getCmp('commands' + appId).add(cmdSetPanel);
+            }
+        });
+    }
+
     //增加命令集
-    function addCmdSet(appId) {
+    function addCmdSetWindow(appId) {
+        alert(appId)
         //请求获取命令组数据并解析
         var cmdGroupNodes = [];
         Ext.Ajax.request({
@@ -117,11 +214,11 @@ Ext.onReady(function() {
                 for (var i = 0; i < cmdGroups.length; i++) {
                     var cmdGroupNode = {};
                     var cmdGroup = cmdGroups[i];
-                    cmdGroupNode.id = 'cmd_group' + cmdGroup.cmd_group.id;
-                    cmdGroupNode.text = cmdGroup.cmd_group.name;
+                    cmdGroupNode.id = 'cmd_group' + cmdGroup.id;
+                    cmdGroupNode.text = cmdGroup.name;
 
                     //为命令组增加命令
-                    var cmdDefs = cmdGroup.cmd_group.cmd_defs;
+                    var cmdDefs = cmdGroup.cmd_defs;
                     if (cmdDefs.length == 0) {
                         cmdGroupNode.leaf = true;
                     } else {
@@ -153,8 +250,6 @@ Ext.onReady(function() {
                     ]
                 });
 
-                //删除命令组的下一个兄弟结点
-                var cmdGgoupTreePanelNextSibling = null;
                 //系统所有的命令组树
 
                 var cmdGroupTreePanel = Ext.create('Ext.tree.Panel', {
@@ -169,6 +264,9 @@ Ext.onReady(function() {
                             ptype: 'treeviewdragdrop',
                             enableDrop:false
                         }
+                    },
+                    selModel:{
+                        mode:'MULTI'
                     },
                     listeners:{
                         itemremove:function(parent, node) {
@@ -200,6 +298,20 @@ Ext.onReady(function() {
                         }
                     }
                 });
+                cmdGroupTreePanel.getSelectionModel().on('select', function(selModel, record) {
+                    var nodes = selModel.getSelection();
+                    if (record.isLeaf() && nodes.indexOf(record.parentNode) > -1) {
+                        selModel.deselect(record);
+                    }
+                    if (!record.isLeaf() && !record.isRoot()) {
+                        record.eachChild(function(child) {
+                            selModel.deselect(child);
+                        });
+                    }
+                    if (record.isRoot()) {
+                        selModel.deselect(record);
+                    }
+                });
 
                 //增加命令到命令集
                 function addCmdSet() {
@@ -212,18 +324,20 @@ Ext.onReady(function() {
                             expression += ',';
                         }
                     });
-                    alert(expression)
                     //更新命令集
                     Ext.Ajax.request({
                         url:'/apps/' + appId + '/cmd_set_defs',
                         method:'POST',
                         params:{
-                            name:Ext.getCmp('cmdSetName').value,
-                            expression:expression
+                            authenticity_token:csrf_token,
+                            'cmd_set_def[name]':Ext.getCmp('cmdSetName').value,
+                            'cmd_set_def[expression]':expression
                         },
                         callback:function(options, success, response) {
-                            alert(success);
-                            alert(response.responseText)
+                            Ext.getCmp('savedStatus').setText('命令集增加成功');
+                            var cmdSetPanel = Ext.getCmp('commands' + appId);
+                            cmdSetPanel.removeAll();
+                            loadCmdSetForApp(appId);
                         }
                     });
                 }
@@ -291,8 +405,7 @@ Ext.onReady(function() {
                                     return;
                                 }
                                 cmdSetTreePanel.getRootNode().commit();
-//                                addCmdSet();
-                                Ext.getCmp('savedStatus').setText('命令集增加成功');
+                                addCmdSet();
                                 this.setDisabled(true);
                             }
                         }
@@ -400,7 +513,7 @@ Ext.onReady(function() {
             var result = response.responseText;
             var obj = Ext.decode(result);
             for (var i = 0; i < obj.length; i++) {
-                addAppTabPanel(obj[i].app.name, obj[i].app.id);
+                addAppTabPanel(obj[i].name, obj[i].id);
             }
             appTabPanel.add(appPanels);//Add to addTabPanel
 
@@ -416,109 +529,16 @@ Ext.onReady(function() {
                             for (var j = 0,len = machines.length; j < len; j++) {
                                 machinesListLabel[machinesListLabel.length] = {
                                     xtype:'label',
-                                    html:machines[j].machine.name,
+                                    html:machines[j].name,
                                     columnWidth:1
                                 }
                             }
                             Ext.getCmp('machines' + id).add(machinesListLabel);
                         }
                     });
-                })(obj[i].app.id);
+                })(obj[i].id);
                 //此处获取App的命令集列表，url为apps/:id/cmd_set_defs
-                (function(id) {
-                    Ext.Ajax.request({
-                        url:'/apps/' + id + '/cmd_set_defs',
-                        callback:function(options, success, response) {
-                            var cmdSetStr = response.responseText;
-                            var cmdSet = Ext.decode(cmdSetStr);
-                            var cmdSetPanel = [];
-                            for (var j = 0,len = cmdSet.length; j < len; j++) {
-                                var columnCount = cmdSet[j].actions.length + 1;
-                                var cmdSetPanelCmps = [];
-                                cmdSetPanelCmps[cmdSetPanelCmps.length] = {
-                                    xtype:'label',
-                                    columnWidth:1 / columnCount,
-                                    html:cmdSet[j].name
-                                };
-                                for (var k = 1; k < columnCount; k++) {
-                                    cmdSetPanelCmps[cmdSetPanelCmps.length] = {
-                                        columnWidth:1 / columnCount,
-                                        xtype:'button',
-                                        text:cmdSet[j].actions[k - 1].name,
-                                        handler:
-                                            (function(url, method, type) {
-                                                return function() {
-                                                    Ext.Ajax.request({
-                                                        url:url,
-                                                        method:method,
-//                                                        params:{
-//                                                            cmd_set_def_id:cmdSetId
-//                                                        },
-                                                        callback:(function(type) {
-                                                            return function(options, success, response) {
-                                                                if (type == 'simple') {
-                                                                    Ext.Msg.alert('消息', response.responseText);
-                                                                } else if (type == 'multi') {
-                                                                    var respondUrl = Ext.decode(response.responseText).url;
-                                                                    var multiWin = Ext.create('Ext.Window', {
-                                                                        width:720,
-                                                                        height:544,
-                                                                        autoScroll:true,
-                                                                        items:[
-                                                                            {
-                                                                                autoScroll:true,
-                                                                                html:getIFrameForEditCmdSet(respondUrl, 700, 500)
-                                                                            }
-                                                                        ]
-                                                                    });
-                                                                    multiWin.show();
-                                                                }
-                                                            }
-                                                        })(type)
-                                                    })
-                                                }
-                                            })(cmdSet[j].actions[k - 1].url, cmdSet[j].actions[k - 1].method, cmdSet[j].actions[k - 1].type)
-                                    }
-                                }
-                                cmdSetPanel[cmdSetPanel.length] = {
-                                    xtype:'panel',
-                                    border:false,
-                                    layout:'column',
-                                    anchor:'100%',
-                                    frame:true,
-                                    items: [
-                                        cmdSetPanelCmps
-                                    ]
-                                }
-                            }
-                            //增加命令集面板
-                            cmdSetPanel[cmdSetPanel.length] = {
-                                xtype:'panel',
-                                layout:'column',
-                                border:false,
-                                anchor:'100%',
-                                frame:true,
-                                items:[
-                                    {
-                                        xtype:'label',
-                                        columnWidth:0.5,
-                                        html:'&nbsp;'
-                                    },
-                                    {
-                                        xtype:'button',
-                                        text:'增加',
-                                        id:'appAddButton' + id,
-                                        columnWidth:0.5,
-                                        handler:function() {
-                                            addCmdSet(this.id.substring(this.id.length - 1));
-                                        }
-                                    }
-                                ]
-                            }
-                            Ext.getCmp('commands' + id).add(cmdSetPanel);
-                        }
-                    });
-                })(obj[i].app.id);
+                loadCmdSetForApp(obj[i].id);
             }
         }
     });

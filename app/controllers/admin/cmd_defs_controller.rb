@@ -8,7 +8,8 @@ class Admin::CmdDefsController < Admin::BaseController
   end
 
   def create
-    respond_with CmdDef.create( params[:cmd_def] )
+    cmd_def = CmdDef.create( params[:cmd_def] )
+    render :text => cmd_def.to_json
   end
 
   def update
