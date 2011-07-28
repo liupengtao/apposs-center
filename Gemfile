@@ -51,4 +51,4 @@ gem "activerecord-jdbc-adapter"
 gem "jruby-openssl"
 gem "state_machine"
 gem "ruby-graphviz", :group => ["development"]
-gem "mvn:org.springframework:spring"
+# gem "mvn:org.springframework:spring"
