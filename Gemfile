@@ -2,6 +2,8 @@ source 'http://rubygems.org'
 
 gem 'rails', '3.0.6'
 
+gem 'rake', '0.8.7'
+
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
@@ -49,3 +51,4 @@ gem "activerecord-jdbc-adapter"
 gem "jruby-openssl"
 gem "state_machine"
 gem "ruby-graphviz", :group => ["development"]
+gem "mvn:org.springframework:spring"

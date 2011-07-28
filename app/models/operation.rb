@@ -9,20 +9,15 @@ class Operation < ActiveRecord::Base
   def callback( isok, body)
     self.isok = isok
     self.response = body
-    deal
+    isok ? ok : error
   end
 
   state_machine :state, :initial => :init do
     event :download do transition :init => :ready end
     event :invoke do transition :ready => :running end
-    event :deal do
-      transition :running => :done if :is_ok?
-      transition :running => :failure unless :is_ok?
-    end
+    event :error do transition :running => :failure end
+    event :ok do transition :running => :done end
     event :ack do transition :failure => :done end
   end
 
-  def is_ok?
-    self.isok
-  end
 end
