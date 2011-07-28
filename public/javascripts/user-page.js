@@ -18,9 +18,9 @@ Ext.onReady(function() {
 
     //应用的中心命令执行状态面板
     //操作模型的定义
-    Ext.define('Operation', {
+    Ext.define('Command', {
         extend:'Ext.data.Model',
-        fields:['id','name','status']
+        fields:['_id','name','state']
     });
 
     //Add Current User's Application to the appPanels array.
@@ -62,35 +62,44 @@ Ext.onReady(function() {
         };
 
         //操作数据store的获取
-        var operationStore = Ext.create('Ext.data.Store', {
-            model:Operation,
+        var commandStore = Ext.create('Ext.data.TreeStore', {
+            model:Command,
             proxy:{
                 type:'ajax',
-                url:'apps/' + id + '/commands',
+                url:'/apps/' + id + '/cmd_sets',
                 reader:{
-                    type:'json',
-                    record:'operation'
+                    type:'json'
                 }
             },
-            autoLoad:true
+            nodeParam:'id',
+            autoLoad:true,
+            root:{
+                text:'命令',
+                id:'root'
+            },
+            listeners:{
+                load:function(store,model) {
+                    alert(model)
+                }
+            }
         });
-        var appCenterPanel = {
-            xtype:'gridpanel',
-            store:operationStore,
+        var appCenterPanel = Ext.create('Ext.tree.Panel', {
+            store:commandStore,
             frame:true,
             region:'center',
             title:'当前应用的命令执行状态',
             columns: [
                 {
+                    xtype:'treecolumn',
                     header:'命令名',
                     dataIndex:'name'
                 },
                 {
                     header:'命令执行状态',
-                    dataIndex:'status'
+                    dataIndex:'state'
                 }
             ]
-        };
+        });
         //应用的总面板
         var appPanel = {
             title:name,
