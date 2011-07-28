@@ -14,6 +14,7 @@ class CmdSetDef < ActiveRecord::Base
       pair = item.squish.split('|')
       cmd_def = CmdDef.where(:id => pair[0].to_i).first
       next_when_fail = (pair[1]=="true")
+
       if cmd_def
         command = Command.create(
             :cmd_def => cmd_def,

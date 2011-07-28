@@ -128,14 +128,15 @@ Ext.onReady(function() {
                             xtype:'button',
                             text:cmdSet[j].actions[k - 1].name,
                             handler:
-                                (function(url, method, type) {
+                                (function(url, method, type, cmdSetDefId) {
                                     return function() {
                                         Ext.Ajax.request({
                                             url:url,
                                             method:method,
-//                                                        params:{
-//                                                            cmd_set_def_id:cmdSetId
-//                                                        },
+                                            params:{
+                                                authenticity_token:csrf_token,
+                                                cmd_set_def_id:cmdSetDefId
+                                            },
                                             callback:(function(type) {
                                                 return function(options, success, response) {
                                                     if (type == 'simple') {
@@ -159,7 +160,7 @@ Ext.onReady(function() {
                                             })(type)
                                         })
                                     }
-                                })(cmdSet[j].actions[k - 1].url, cmdSet[j].actions[k - 1].method, cmdSet[j].actions[k - 1].type)
+                                })(cmdSet[j].actions[k - 1].url, cmdSet[j].actions[k - 1].method, cmdSet[j].actions[k - 1].type, cmdSet[j].id)
                         }
                     }
                     cmdSetPanel[cmdSetPanel.length] = {
@@ -204,7 +205,6 @@ Ext.onReady(function() {
 
     //增加命令集
     function addCmdSetWindow(appId) {
-        alert(appId)
         //请求获取命令组数据并解析
         var cmdGroupNodes = [];
         Ext.Ajax.request({
