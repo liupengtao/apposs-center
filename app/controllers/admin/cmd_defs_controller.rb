@@ -17,6 +17,6 @@ class Admin::CmdDefsController < Admin::BaseController
   end
 
   def destroy
-    respond_with CmdDef.find(params[:id])
+    respond_with CmdDef.find(params[:id]).delete
   end
 end

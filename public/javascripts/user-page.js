@@ -6,6 +6,27 @@
  * To change this template use File | Settings | File Templates.
  */
 Ext.onReady(function() {
+
+    Ext.define('Ext.data.proxy.AnotherAjax', {
+        requires: ['Ext.util.MixedCollection', 'Ext.Ajax'],
+        extend: 'Ext.data.proxy.Ajax',
+        alias: 'proxy.another_ajax',
+
+
+        buildUrl: function(request) {
+            var me = this,
+                url = me.getUrl(request);
+            if (request.params.id != 'root') {
+                url += '/' + request.params.id;
+            }
+            if (me.noCache) {
+                url = Ext.urlAppend(url, Ext.String.format("{0}={1}", me.cacheString, Ext.Date.now()));
+            }
+            return url;
+        },
+
+    });
+
     //Application Panel array
     var appPanels = [];
     var csrf_token = $('meta[name="csrf-token"]').attr('content');
@@ -20,19 +41,15 @@ Ext.onReady(function() {
     //操作模型的定义
     Ext.define('Command', {
         extend:'Ext.data.Model',
-        fields:['_id','name','state']
+        fields:['id','name','state']
     });
 
     //Add Current User's Application to the appPanels array.
     function addAppTabPanel(name, id) {
         //应用的左侧面板
         var appLeftPanel = {
-            title:name,
             layout:'vbox',
-            frame:true,
-            split:true,
             autoScroll:true,
-            collapsible:true,
             region:'west',
             items:[
                 {
@@ -56,7 +73,8 @@ Ext.onReady(function() {
                     width:400,
                     id:'commands' + id,
                     layout:'anchor',
-                    frame:true
+                    frame:true,
+                    autoScroll:true
                 }
             ]
         };
@@ -65,7 +83,7 @@ Ext.onReady(function() {
         var commandStore = Ext.create('Ext.data.TreeStore', {
             model:Command,
             proxy:{
-                type:'ajax',
+                type:'another_ajax',
                 url:'/apps/' + id + '/cmd_sets',
                 reader:{
                     type:'json'
@@ -75,11 +93,20 @@ Ext.onReady(function() {
             autoLoad:true,
             root:{
                 text:'命令',
-                id:'root'
+                id:'root',
+                expanded:true
             },
             listeners:{
-                load:function(store,model) {
-                    alert(model)
+                beforeload:function(store, operation) {
+                },
+                load:function(store, model) {
+                    model.eachChild(function(child) {
+                        if (model.get('id') == 'root') {
+                            child.set('id', child.get('id') + '/commands');
+                        } else {
+                            child.set('id', model.get('id') + '/' + child.get('id') + '/operations');
+                        }
+                    });
                 }
             }
         });
@@ -88,6 +115,7 @@ Ext.onReady(function() {
             frame:true,
             region:'center',
             title:'当前应用的命令执行状态',
+            rootVisible:false,
             columns: [
                 {
                     xtype:'treecolumn',
@@ -416,6 +444,9 @@ Ext.onReady(function() {
                                 cmdSetTreePanel.getRootNode().commit();
                                 addCmdSet();
                                 this.setDisabled(true);
+                                setTimeout(function() {
+                                    addCmdSetWin.close();
+                                }, 500);
                             }
                         }
                     ],
