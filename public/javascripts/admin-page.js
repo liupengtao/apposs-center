@@ -70,7 +70,8 @@ Ext.onReady(function() {
             extraParams: {
                 authenticity_token:$('meta[name="csrf-token"]').attr('content')
             }
-        }
+        },
+        idProperty:'_id'
     });
 
     //命令的GridPanel Store
@@ -233,75 +234,35 @@ Ext.onReady(function() {
                             var r = Ext.ModelManager.create({
                             }, 'CmdDef');
                             cmdDefGridStore.add(r);
-                            cmdDefPanelRowEditing.startEdit(r);
+                            cmdDefPanelRowEditing.startEditByPosition({});
                         }
                     }
                 ],
                 listeners: {
                     edit:function(editor, e) {
                         editor.record.commit();
-                        editor.record.save({
-                            success: function(cmdDef) {
-                                alert(cmdDef)
+                        var record = editor.record;
+                        Ext.Ajax.request({
+                            url:'/admin/cmd_defs/' + record.get('id'),
+                            method:'PUT',
+                            params:{
+                                authenticity_token:$('meta[name="csrf-token"]').attr('content'),
+                                'cmd_def[name]':record.get('name'),
+                                'cmd_def[alias]':record.get('alias'),
+                                'cmd_def[arg1]':record.get('arg1'),
+                                'cmd_def[arg2]':record.get('arg2'),
+                                'cmd_def[arg3]':record.get('arg3'),
+                                'cmd_def[arg4]':record.get('arg4'),
+                                'cmd_def[arg5]':record.get('arg5'),
+                                'cmd-def[cmd_group_id]':record.get('cmd_group_id')
+                            },
+                            callback:function(options,success,response) {
+                                
                             }
                         });
                     }
                 }
             }
-//            {
-//                xtype:'fieldset',
-////                margin:'0 0 0 5',
-//                collapsible:true,
-//                split:true,
-//                region:'east',
-//                title:'命令信息',
-//                defaultType:'textfield',
-//                defaults: {
-//                    labelWidth:50
-//                },
-//                items:[
-//                    {
-//                        xtype:'hidden',
-//                        name:'id'
-//                    },
-//                    {
-//                        fieldLabel:'命令名',
-//                        name:'name'
-//                    },
-//                    {
-//                        fieldLabel:'别名',
-//                        name:'alias'
-//                    },
-//                    {
-//                        fieldLabel:'参数1',
-//                        name:'arg1'
-//                    },
-//                    {
-//                        fieldLabel:'参数2',
-//                        name:'arg2'
-//                    },
-//                    {
-//                        fieldLabel:'参数3',
-//                        name:'arg3'
-//                    },
-//                    {
-//                        fieldLabel:'参数4',
-//                        name:'arg4'
-//                    },
-//                    {
-//                        fieldLabel:'参数5',
-//                        name:'arg5'
-//                    },
-//                    {
-//                        fieldLabel:'命令组',
-//                        xtype:'combo',
-//                        name:'cmd_group_id',
-//                        valueField:'id',
-//                        displayField:'name',
-//                        store:cmdGroupComboStore
-//                    }
-//                ]
-//            }
         ]
     });
     //命令组管理面板
