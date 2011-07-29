@@ -16,6 +16,6 @@ class Admin::CmdGroupsController < Admin::BaseController
   end
 
   def destroy
-    respond_with CmdGroup.find(params[:id])
+    respond_with CmdGroup.find(params[:id]).delete
   end
 end

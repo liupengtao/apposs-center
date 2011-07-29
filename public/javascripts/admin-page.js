@@ -64,14 +64,13 @@ Ext.onReady(function() {
         extend:'Ext.data.Model',
         fields:['id','name','alias','arg1','arg2','arg3','arg4','arg5','cmd_group_id'],
         proxy:{
-            type:'rest',
+            type:'ajax',
             url:'/admin/cmd_defs',
             reader:'json',
             extraParams: {
                 authenticity_token:$('meta[name="csrf-token"]').attr('content')
             }
-        },
-        idProperty:'_id'
+        }
     });
 
     //命令的GridPanel Store
@@ -91,15 +90,25 @@ Ext.onReady(function() {
         }
     });
 
-    //命令组Combo的Store
-    var cmdGroupComboStore = Ext.create('Ext.data.Store', {
+    //编辑命令中的命令组Combo的Store
+    var editCmdDefCmdGroupComboStore = Ext.create('Ext.data.Store', {
         model:CmdGroup,
         autoLoad:true
     });
-    cmdGroupComboStore.load();
+    editCmdDefCmdGroupComboStore.load();
+    //增加命令时对应的命令组
+    var addCmdDefCmdGroupComboStore = Ext.create('Ext.data.Store', {
+        model:CmdGroup,
+        autoLoad:true
+    });
+    //编辑命令组中的数据store
+    var cmdGroupGridStore = Ext.create('Ext.data.Store', {
+        model:CmdGroup,
+        autoLoad:true
+    });
     //命令中的命令组renderer
     function cmdGroupRender(value) {
-        var comboRecord = cmdGroupComboStore.getById(value);
+        var comboRecord = editCmdDefCmdGroupComboStore.getById(value);
         if (comboRecord) {
             return comboRecord.get('name');
         }
@@ -109,6 +118,9 @@ Ext.onReady(function() {
     var cmdDefPanelRowEditing = Ext.create('Ext.grid.plugin.RowEditing', {
         clicksToEdit: 1
     });
+    var cmdGroupPanelRowEditing = Ext.create('Ext.grid.plugin.RowEditing', {
+        clicksToEdit: 1
+    });
     //命令管理面板
     var cmdDefPanel = Ext.create('Ext.form.Panel', {
         frame:true,
@@ -116,7 +128,6 @@ Ext.onReady(function() {
         title:'命令管理',
         bodyPadding:5,
         layout:'border',
-//        collapsible:true,
         split:true,
         fieldDefaults: {
             labelAlign: 'left',
@@ -139,7 +150,7 @@ Ext.onReady(function() {
                 ],
                 columns:[
                     {
-                        text:'命名名',
+                        text:'命令名',
                         dataIndex:'name',
                         flex:6,
                         editor: {
@@ -204,8 +215,9 @@ Ext.onReady(function() {
                             name:'cmd_group_id',
                             valueField:'id',
                             displayField:'name',
-                            store:cmdGroupComboStore,
-                            allowBlank: false
+                            store:editCmdDefCmdGroupComboStore,
+//                            allowBlank: false,
+                            editable:false
                         },
                         renderer:cmdGroupRender
                     },
@@ -218,9 +230,18 @@ Ext.onReady(function() {
                                 tooltip: '删除当前命令',
                                 handler: function(grid, rowIndex, colIndex) {
                                     var r = cmdDefGridStore.getAt(rowIndex);
+                                    Ext.Ajax.request({
+                                        url:'/admin/cmd_defs/' + r.get('id'),
+                                        method:'DELETE',
+                                        params:{
+                                            authenticity_token:$('meta[name="csrf-token"]').attr('content')
+                                        },
+                                        callback:function (options, success, response) {
+
+                                        }
+                                    });
                                     cmdDefGridStore.remove(r);
-                                    cmdDefGridStore.sync();
-                                    r.destroy();
+                                    cmdDefGridStore.reload();
                                 }
                             }
                         ]
@@ -231,10 +252,97 @@ Ext.onReady(function() {
                         text: '增加命令',
                         iconCls:'add',
                         handler : function() {
-                            var r = Ext.ModelManager.create({
-                            }, 'CmdDef');
-                            cmdDefGridStore.add(r);
-                            cmdDefPanelRowEditing.startEditByPosition({});
+                            var addCmdDefWin = Ext.create('Ext.Window', {
+                                title:'增加命令',
+                                layout:'border',
+                                width:500,
+                                items:[
+                                    Ext.create('Ext.form.Panel', {
+                                        region:'center',
+                                        frame:'true',
+                                        url:'/admin/cmd_defs',
+                                        defaultType:'textfield',
+                                        defaults: {
+                                            labelWidth:90,
+                                            anchor:'95%'
+                                        },
+                                        items:[
+                                            {
+                                                xtype:'hidden',
+                                                name:'authenticity_token',
+                                                value:$('meta[name="csrf-token"]').attr('content')
+                                            },
+                                            {
+                                                fieldLabel:'命令名',
+                                                name:'cmd_def[name]',
+                                                allowBlank:false,
+                                                blankText:'命令名不能为空'
+                                            },
+                                            {
+                                                fieldLabel:'别名',
+                                                name:'cmd_def[alias]'
+                                            },
+                                            {
+                                                fieldLabel:'参数1',
+                                                name:'cmd_def[arg1]'
+                                            },
+                                            {
+                                                fieldLabel:'参数2',
+                                                name:'cmd_def[arg2]'
+                                            },
+                                            {
+                                                fieldLabel:'参数3',
+                                                name:'cmd_def[arg3]'
+                                            },
+                                            {
+                                                fieldLabel:'参数4',
+                                                name:'cmd_def[arg4]'
+                                            },
+                                            {
+                                                fieldLabel:'参数5',
+                                                name:'cmd_def[arg5]'
+                                            },
+                                            {
+                                                fieldLabel:'命令组',
+                                                xtype:'combo',
+                                                name:'cmd_def[cmd_group_id]',
+                                                valueField:'id',
+                                                displayField:'name',
+                                                store:addCmdDefCmdGroupComboStore,
+                                                editable:false
+                                            }
+                                        ],
+                                        buttons:[
+                                            {
+                                                text:'保存',
+                                                handler:function() {
+                                                    var form = this.up('form').getForm();
+                                                    if (form.isValid()) {
+                                                        form.submit({
+                                                            success: function(form, action) {
+                                                                cmdDefGridStore.load();
+                                                                addCmdDefWin.close();
+                                                            },
+                                                            failure: function(form, action) {
+                                                                cmdDefGridStore.load();
+                                                                addCmdDefCmdGroupComboStore.load();
+                                                                addCmdDefWin.close();
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                text:'重设',
+                                                handler:function() {
+                                                    this.up('form').getForm().reset();
+                                                }
+                                            }
+                                        ]
+                                    })
+                                ]
+                            });
+                            addCmdDefWin.show();
                         }
                     }
                 ],
@@ -254,10 +362,10 @@ Ext.onReady(function() {
                                 'cmd_def[arg3]':record.get('arg3'),
                                 'cmd_def[arg4]':record.get('arg4'),
                                 'cmd_def[arg5]':record.get('arg5'),
-                                'cmd-def[cmd_group_id]':record.get('cmd_group_id')
+                                'cmd_def[cmd_group_id]':record.get('cmd_group_id')
                             },
-                            callback:function(options,success,response) {
-                                
+                            callback:function(options, success, response) {
+
                             }
                         });
                     }
@@ -267,8 +375,152 @@ Ext.onReady(function() {
     });
     //命令组管理面板
     var cmdGroupDefPanel = {
+        frame:true,
         id:'3',
-        title:'命令组管理'
+        title:'命令组管理',
+        bodyPadding:5,
+        layout:'border',
+        split:true,
+        fieldDefaults: {
+            labelAlign: 'left',
+            msgTarget: 'side'
+        },
+        items: [
+            {
+                region:'center',
+                xtype: 'gridpanel',
+                title:'当前系统所有命令组',
+                store:cmdGroupGridStore,
+                split:true,
+                columnLines:true,
+                viewConfig: {
+                    stripeRows: true
+                },
+                selType: 'rowmodel',
+                plugins: [
+                    cmdGroupPanelRowEditing
+                ],
+                columns:[
+                    {
+                        text:'命令组名',
+                        dataIndex:'name',
+                        flex:16,
+                        editor: {
+                            xtype: 'textfield',
+                            allowBlank: false
+                        }
+                    },
+                    {
+                        flex:1,
+                        xtype: 'actioncolumn',
+                        items: [
+                            {
+                                icon   : '/images/delete.gif',
+                                tooltip: '删除当前命令组',
+                                handler: function(grid, rowIndex, colIndex) {
+                                    var r = cmdGroupGridStore.getAt(rowIndex);
+                                    Ext.Ajax.request({
+                                        url:'/admin/cmd_groups/' + r.get('id'),
+                                        method:'DELETE',
+                                        params:{
+                                            authenticity_token:$('meta[name="csrf-token"]').attr('content')
+                                        },
+                                        callback:function (options, success, response) {
+
+                                        }
+                                    });
+                                    cmdGroupGridStore.remove(r);
+                                    cmdGroupGridStore.reload();
+                                }
+                            }
+                        ]
+                    }
+                ],
+                tbar: [
+                    {
+                        text: '增加命令组',
+                        iconCls:'add',
+                        handler : function() {
+                            var addCmdGroupWin = Ext.create('Ext.Window', {
+                                title:'增加命令组',
+                                layout:'border',
+                                width:300,
+                                height:150,
+                                items:[
+                                    Ext.create('Ext.form.Panel', {
+                                        region:'center',
+                                        frame:'true',
+                                        url:'/admin/cmd_groups',
+                                        defaultType:'textfield',
+                                        defaults: {
+                                            labelWidth:90,
+                                            anchor:'95%'
+                                        },
+                                        items:[
+                                            {
+                                                xtype:'hidden',
+                                                name:'authenticity_token',
+                                                value:$('meta[name="csrf-token"]').attr('content')
+                                            },
+                                            {
+                                                fieldLabel:'命令组名',
+                                                name:'cmd_group[name]',
+                                                allowBlank:false,
+                                                blankText:'命令组名不能为空'
+                                            }
+                                        ],
+                                        buttons:[
+                                            {
+                                                text:'保存',
+                                                handler:function() {
+                                                    var form = this.up('form').getForm();
+                                                    if (form.isValid()) {
+                                                        form.submit({
+                                                            success: function(form, action) {
+                                                                cmdGroupGridStore.load();
+                                                                addCmdGroupWin.close();
+                                                            },
+                                                            failure: function(form, action) {
+                                                                cmdGroupGridStore.load();
+                                                                addCmdGroupWin.close();
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                text:'重设',
+                                                handler:function() {
+                                                    this.up('form').getForm().reset();
+                                                }
+                                            }
+                                        ]
+                                    })
+                                ]
+                            });
+                            addCmdGroupWin.show();
+                        }
+                    }
+                ],
+                listeners: {
+                    edit:function(editor, e) {
+                        editor.record.commit();
+                        var record = editor.record;
+                        Ext.Ajax.request({
+                            url:'/admin/cmd_groups/' + record.get('id'),
+                            method:'PUT',
+                            params:{
+                                authenticity_token:$('meta[name="csrf-token"]').attr('content'),
+                                'cmd_group[name]':record.get('name')
+                            },
+                            callback:function(options, success, response) {
+
+                            }
+                        });
+                    }
+                }
+            }
+        ]
     };
     //应用管理面板
     var appPanel = {

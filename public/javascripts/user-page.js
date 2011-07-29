@@ -50,6 +50,8 @@ Ext.onReady(function() {
         var appLeftPanel = {
             layout:'vbox',
             autoScroll:true,
+            collapsible:true,
+            split:true,
             region:'west',
             items:[
                 {
